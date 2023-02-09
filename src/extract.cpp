@@ -512,6 +512,42 @@ public:
   };
 };
 
+class SUBSP_t : public Inst_t { //TODO: Doing
+  uint16_t imm7;
+
+public:
+  SUBSP_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+    imm7 = (inCode & 0b1111111) << 2;
+  }
+  virtual void Print() { printf("%x: sub sp, #%d", addr, imm7); }
+  
+  virtual void romeoFuncContent() {
+    wReg(13);
+    pReg(13);
+    printf(" - %d;\n", imm7);
+    updateSR(13);
+    printf("\n");
+  };
+};
+
+class ADDSP_t : public Inst_t { //TODO: Doing
+  uint16_t imm7;
+
+public:
+  ADDSP_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+    imm7 = (inCode & 0b1111111) << 2;
+  }
+  virtual void Print() { printf("%x: add sp, #%d", addr, imm7); }
+  
+  virtual void romeoFuncContent() {
+    wReg(13);
+    pReg(13);
+    printf(" + %d;\n", imm7);
+    updateSR(13);
+    printf("\n");
+  };
+};
+
 class PUSHLIST_t : public Inst_t {
   uint16_t sRegList;
 
@@ -643,6 +679,13 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
   if (inCode & (1 << 12)) {
     uint16_t codop = (inCode >> 8) & 0b1111;
     switch (codop) {
+    case 0b0000: 
+        if (inCode & (1 << 7)) {
+            return new SUBSP_t(inAddr, inCode);
+        }
+        else {
+            return new ADDSP_t(inAddr, inCode);
+        }
     case 0b0100:
     case 0b0101:
       return new PUSHLIST_t(inAddr, inCode);
