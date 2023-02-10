@@ -414,6 +414,32 @@ public:
   }
 };
 
+class SDPADD_t : public Inst_t {
+  uint8_t dReg, sReg, Rdn;
+
+public:
+  SDPADD_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+    Rdn = inCode & 0b111;
+    dReg = ((inCode >> 4) & 0b1000) | (inCode & 0b111); // DN:Rdn
+    sReg = (inCode >> 3) & 0b1111; // Rm
+  }
+  virtual void Print() {
+    printf("%x: add ", addr);
+    printReg(Rdn);
+    printf(", ");
+    printReg(sReg);
+  }
+  virtual void romeoFuncContent() {
+    wReg(dReg);
+    pReg(dReg);
+    printf(" + ");
+    pReg(sReg);
+    printf(";\n");
+    updateSR(dReg);
+    printf("\n");
+  };
+};
+
 class SDPMOV_t : public Inst_t {
   uint8_t dReg, sReg;
 
@@ -445,7 +471,10 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
     if (inCode & (1 << 10)) {
       secondOpCode = (inCode >> 8) & 0b11;
       switch (secondOpCode) {
-      case 2:
+      case 0:
+      	return new SDPADD_t(inAddr, inCode);
+      	break;
+      case 2: 
         return new SDPMOV_t(inAddr, inCode);
         break;
       case 3:
@@ -456,6 +485,7 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
         break;
       }
       printf("Unsupported special data processing inst: %d\n", secondOpCode);
+      printf("Dealing with instruction @%d, code %d (primOpCode: %d, secondOpCode: %d) \n", inAddr, inCode, primOpCode, secondOpCode);
     } else {
       secondOpCode = (inCode >> 6) & 0b1111;
       switch (secondOpCode) {
@@ -478,6 +508,7 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
     //   break;
   }
   printf("Unsupported instruction bits 12-11: %d\n", primOpCode);
+  printf("Instruction %d @ %d", inCode, inAddr);
   return NULL;
 }
 
@@ -512,7 +543,7 @@ public:
   };
 };
 
-class SUBSP_t : public Inst_t { //TODO: Doing
+class SUBSP_t : public Inst_t {
   uint16_t imm7;
 
 public:
@@ -530,7 +561,7 @@ public:
   };
 };
 
-class ADDSP_t : public Inst_t { //TODO: Doing
+class ADDSP_t : public Inst_t {
   uint16_t imm7;
 
 public:
