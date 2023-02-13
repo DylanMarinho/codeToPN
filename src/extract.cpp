@@ -539,7 +539,7 @@ public:
   virtual void romeoFuncContent() {
     wReg(dReg);
     pReg(13);
-    printf(" + %d\n", imm8);
+    printf(" + %d;\n", imm8);
   };
 };
 
