@@ -128,7 +128,7 @@ public:
   virtual void romeoFuncContent() {
     wReg(dReg);
     pReg(sReg);
-    printf(" << %d\n", imm5);
+    printf(" << %d;\n", imm5);
     //    updateSR(dReg);
   };
 };
@@ -146,7 +146,7 @@ public:
   virtual void romeoFuncContent() {
     wReg(dReg);
     pReg(sReg);
-    printf(" >> %d\n", imm5);
+    printf(" >> %d;\n", imm5);
     //    updateSR(dReg);
   };
 };
@@ -164,7 +164,7 @@ public:
   virtual void romeoFuncContent() {
     wReg(dReg);
     pReg(sReg);
-    printf(" >> %d\n", imm5);
+    printf(" >> %d;\n", imm5);
     //    updateSR(dReg);
   };
 };
@@ -458,7 +458,7 @@ public:
     if (dReg != sReg) {
       wReg(dReg);
       pReg(sReg);
-      printf("\n");
+      printf(";\n");
     }
   };
 };
