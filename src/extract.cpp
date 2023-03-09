@@ -706,6 +706,17 @@ public:
   }
 };
 
+class NOP_t : public Inst_t {
+
+public:
+  NOP_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+  }
+  virtual void Print() { printf("%x: nop", addr); }
+  
+  /*virtual void romeoFuncContent() {
+  };*/
+};
+
 Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
   if (inCode & (1 << 12)) {
     uint16_t codop = (inCode >> 8) & 0b1111;
@@ -725,8 +736,17 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
     case 0b1101:
       return new POPLIST_t(inAddr, inCode);
       break;
+    case 0b1111:
+      switch (inCode & 0b11111111) {
+        case 0b00000000:
+          return new NOP_t(inAddr, inCode);
+          break;
+        default:
+          printf("Unsupported Miscellaneous instruction (if-then and hints):  %d @ %d \n", inCode, inAddr);
+      }
+      break;
     default:
-      printf("Unsupported Miscellaneous instruction : %d\n", codop);
+      printf("Unsupported Miscellaneous instruction : %d @ %d \n", inCode, inAddr);
     }
   } else {
     if (inCode & (1 << 11))
