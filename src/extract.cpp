@@ -878,6 +878,16 @@ public:
   virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #noteq Zmask)"; }
 };
 
+class BLT_t : public CONDBR_t {
+public:
+    BLT_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
+    virtual void Print() {
+        printf("%x: blt.n ", addr);
+        PrintOffset();
+    }
+    virtual const char *guard() { return "(st[$any].regs.sr &  Nmask) #eqeq Nmask"; }
+};
+
 class BLE_t : public CONDBR_t {
 public:
   BLE_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
@@ -1044,11 +1054,15 @@ Inst_t *Inst_t::decodeThumb6(const uint32_t inAddr, const uint16_t inCode) {
     case 0b1010:
       return new BGE_t(inAddr, inCode);
       break;
+    case 0b1011:
+      return new BLT_t(inAddr, inCode);
     case 0b1101:
       return new BLE_t(inAddr, inCode);
       break;
     case 0b1111:
       break;
+    default:
+        printf("Unsupported operation.");
     }
   } else {
     if (inCode & (1 << 11))
