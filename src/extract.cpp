@@ -1157,6 +1157,52 @@ public:
   virtual uint32_t targetIdTaken() { return mTargetIdTaken; }
 };
 
+class MUL_t : public Inst_t {
+    uint8_t nReg, dReg, mReg;
+
+public:
+    MUL_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+      nReg = ((inCode >> 16) & 0b1111);
+      dReg = ((inCode >> 8) & 0b1111);
+      mReg = ((inCode) & 0b1111);
+    }
+
+    virtual void Print() { printf("%x: mul r%d, r%d, r%d", addr, dReg, nReg, mReg); }
+
+    virtual void romeoFuncContent() {
+      wReg(dReg);
+      pReg(nReg);
+      printf("*");
+      pReg(mReg);
+      printf(";\n");
+      updateSR(dReg);
+      printf("\n");
+    };
+};
+
+class SDIV_t : public Inst_t {
+    uint8_t nReg, dReg, mReg;
+
+public:
+    SDIV_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+      nReg = ((inCode >> 16) & 0b1111);
+      dReg = ((inCode >> 8) & 0b1111);
+      mReg = ((inCode) & 0b1111);
+    }
+
+    virtual void Print() { printf("%x: sdiv r%d, r%d, r%d", addr, dReg, nReg, mReg); }
+
+    virtual void romeoFuncContent() {
+      wReg(dReg);
+      pReg(nReg);
+      printf("/");
+      pReg(mReg);
+      printf(";\n");
+      updateSR(dReg);
+      printf("\n");
+    };
+};
+
 Inst_t *Inst_t::decodeARM32(const uint32_t inAddr, const uint32_t inCode) {
   const uint32_t codop = ((inCode >> 27) & 0b11);
   //  printf("%x, %x\n", inCode, codop);
@@ -1171,6 +1217,29 @@ Inst_t *Inst_t::decodeARM32(const uint32_t inAddr, const uint32_t inCode) {
     }
     printf("Unsupported subCodop : %d", subCodop);
     break;
+  case 3: {
+    const uint32_t codOp2 = ((inCode >> 20) & 0b1111111);
+    if ((!(codOp2 >> 6)) && (codOp2 >> 4 & 0b11) && !(codOp2 & 0b1)) { //codeOp2 = 0110xxx
+      const uint32_t subCodOp1 = ((inCode >> 20) & 0b111);
+      const uint32_t subCodOp2 = ((inCode >> 4) & 0b11);
+      const uint32_t subCodOpRa = ((inCode >> 12) & 0b1111);
+      if (subCodOp1 == 0b000 && subCodOp2 == 0b00 && subCodOpRa == 0b1111) { //mul
+        return new MUL_t(inAddr, inCode);
+      }
+    } else if ((!(codOp2 >> 6)) && (codOp2 >> 3 & 0b111)) { //codeOp2 = 0111xxx
+      const uint32_t subCodOp1 = ((inCode >> 20) & 0b111);
+      const uint32_t subCodOp2 = ((inCode >> 4) & 0b1111);
+      if(subCodOp1 == 0b001 && subCodOp2 == 0b1111) { //sdiv
+        return new SDIV_t(inAddr, inCode);
+      }
+      }
+      else {
+        printf("Unsupported operation: %d @ %d (2)\n", inCode, inAddr);
+      }
+    break;
+  }
+  default:
+    printf("Unsupported operation: %d @ %d\n", inCode, inAddr);
   }
   return NULL;
 }
