@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <romeo version="Romeo v3.8.6"> </romeo>
-<TPN name="/home/dylan/Documents/git/src/twoCoresModel3_empty.xml">
+<TPN name="/home/dylan/Documents/git/examples/twoCoresModel3_empty.xml">
   <place id="1" identifier="P1" label="P1" initialMarking="0" eft="0" lft="inf"> 
       <graphics color="0"> 
          <position x="961.0" y="121.0"/> 
@@ -17,33 +17,9 @@
       <scheduling gamma="0" omega="0"/> 
   </place> 
 
-  <place id="3" identifier="Bus_request_Prolog" label="Bus_request_Prolog" initialMarking="0" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="211.0" y="361.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
   <place id="4" identifier="P4" label="P4" initialMarking="1" eft="0" lft="inf"> 
       <graphics color="0"> 
          <position x="781.0" y="61.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
-  <place id="5" identifier="Memory_access_Prolog" label="Memory_access_Prolog" initialMarking="0" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="361.0" y="361.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
-  <place id="6" identifier="P6" label="P6" initialMarking="0" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="511.0" y="361.0"/> 
          <deltaLabel deltax="10" deltay="10"/> 
       </graphics> 
       <scheduling gamma="0" omega="0"/> 
@@ -85,46 +61,6 @@
       <graphics color="0"> 
          <position x="631.0" y="181.0"/> 
          <deltaLabel deltax="39.0" deltay="-18.0"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
-  <place id="12" identifier="Compute_Prolog" label="Compute_Prolog" initialMarking="1" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="61.0" y="361.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
-  <place id="13" identifier="Bus_request_Epilog" label="Bus_request_Epilog" initialMarking="0" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="811.0" y="361.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
-  <place id="14" identifier="Memory_access_Epilog" label="Memory_access_Epilog" initialMarking="0" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="961.0" y="361.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
-  <place id="15" identifier="P15" label="P15" initialMarking="0" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="1096.0" y="361.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
-      </graphics> 
-      <scheduling gamma="0" omega="0"/> 
-  </place> 
-
-  <place id="16" identifier="Compute_Epilog" label="Compute_Epilog" initialMarking="0" eft="0" lft="inf"> 
-      <graphics color="0"> 
-         <position x="661.0" y="361.0"/> 
-         <deltaLabel deltax="10" deltay="10"/> 
       </graphics> 
       <scheduling gamma="0" omega="0"/> 
   </place> 
@@ -190,66 +126,6 @@ accessCount = ac[$any];]]></update>
      <update><![CDATA[lockBus = 0;]]></update> 
   </transition> 
 
-  <transition id="6" identifier="T6" label="T6"  eft="0" lft="0" lft_param="0" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard="lockBus #eqeq 0"> 
-     <graphics color="0"> 
-        <position x="286.0" y="361.0"/> 
-        <deltaLabel deltax="25" deltay="0"/> 
-        <deltaGuard deltax="18.0" deltay="-43.0"/> 
-        <deltaUpdate deltax="27.0" deltay="-28.0"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[lockBus = 1;]]></update> 
-  </transition> 
-
-  <transition id="7" identifier="T7" label="T7"  eft="10" lft="10" eft_param="10" lft_param="10" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard=""> 
-     <graphics color="0"> 
-        <position x="436.0" y="361.0"/> 
-        <deltaLabel deltax="29.0" deltay="4.0"/> 
-        <deltaGuard deltax="20" deltay="-20"/> 
-        <deltaUpdate deltax="31.0" deltay="-25.0"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[lockBus = 0;]]></update> 
-  </transition> 
-
-  <transition id="8" identifier="T8" label="T8"  eft="1" lft="1" eft_param="1" lft_param="1" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard=""> 
-     <graphics color="0"> 
-        <position x="136.0" y="361.0"/> 
-        <deltaLabel deltax="25" deltay="0"/> 
-        <deltaGuard deltax="20" deltay="-20"/> 
-        <deltaUpdate deltax="20" deltay="10"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[]]></update> 
-  </transition> 
-
-  <transition id="9" identifier="T9" label="T9"  eft="1" lft="1" eft_param="1" lft_param="1" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard=""> 
-     <graphics color="0"> 
-        <position x="736.0" y="361.0"/> 
-        <deltaLabel deltax="2.0" deltay="-35.0"/> 
-        <deltaGuard deltax="20" deltay="-20"/> 
-        <deltaUpdate deltax="20" deltay="10"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[]]></update> 
-  </transition> 
-
-  <transition id="10" identifier="T10" label="T10"  eft="0" lft="0" lft_param="0" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard="prologAccessCount #greater 0"> 
-     <graphics color="0"> 
-        <position x="286.0" y="421.0"/> 
-        <deltaLabel deltax="25" deltay="0"/> 
-        <deltaGuard deltax="0" deltay="17"/> 
-        <deltaUpdate deltax="7" deltay="33"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[prologAccessCount = prologAccessCount - 1;]]></update> 
-  </transition> 
-
   <transition id="11" identifier="Fetch1" label="Fetch1"  eft="0" lft="0" lft_param="0" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard="doFetch[$any] #eqeq 0"> 
      <graphics color="0"> 
         <position x="361.0" y="121.0"/> 
@@ -296,54 +172,6 @@ accessCount = ac[$any];]]></update>
         <deltaCost deltax="-20" deltay="5"/> 
      </graphics> 
      <update><![CDATA[lockBus = 0;]]></update> 
-  </transition> 
-
-  <transition id="15" identifier="T15" label="T15"  eft="0" lft="0" lft_param="0" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard="lockBus #eqeq 0"> 
-     <graphics color="0"> 
-        <position x="886.0" y="361.0"/> 
-        <deltaLabel deltax="17.0" deltay="5.0"/> 
-        <deltaGuard deltax="-61.0" deltay="-40.0"/> 
-        <deltaUpdate deltax="-23.0" deltay="-30.0"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[lockBus = 1;]]></update> 
-  </transition> 
-
-  <transition id="16" identifier="T16" label="T16"  eft="10" lft="10" eft_param="10" lft_param="10" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard=""> 
-     <graphics color="0"> 
-        <position x="1036.0" y="361.0"/> 
-        <deltaLabel deltax="25" deltay="0"/> 
-        <deltaGuard deltax="20" deltay="-20"/> 
-        <deltaUpdate deltax="-2.0" deltay="-23.0"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[lockBus = 0;]]></update> 
-  </transition> 
-
-  <transition id="17" identifier="T17" label="T17"  eft="0" lft="0" lft_param="0" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard=""> 
-     <graphics color="0"> 
-        <position x="886.0" y="421.0"/> 
-        <deltaLabel deltax="25" deltay="0"/> 
-        <deltaGuard deltax="20" deltay="-20"/> 
-        <deltaUpdate deltax="20" deltay="10"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[]]></update> 
-  </transition> 
-
-  <transition id="18" identifier="T18" label="T18"  eft="500" lft="1000" eft_param="500" lft_param="1000" speed="1" priority="0" cost="0" unctrl="0" obs="1"  guard="prologAccessCount #eqeq 0 "> 
-     <graphics color="0"> 
-        <position x="586.0" y="361.0"/> 
-        <deltaLabel deltax="25" deltay="0"/> 
-        <deltaGuard deltax="20" deltay="-20"/> 
-        <deltaUpdate deltax="20" deltay="10"/> 
-        <deltaSpeed deltax="-20" deltay="5"/> 
-        <deltaCost deltax="-20" deltay="5"/> 
-     </graphics> 
-     <update><![CDATA[]]></update> 
   </transition> 
 
   <arc place="9" transition="1" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
@@ -450,84 +278,6 @@ accessCount = ac[$any];]]></update>
      </graphics> 
   </arc> 
 
-  <arc place="3" transition="6" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="10" transition="6" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="5" transition="6" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="5" transition="7" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="10" transition="7" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="6" transition="7" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="12" transition="8" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="3" transition="8" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="16" transition="9" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="13" transition="9" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="6" transition="10" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="12" transition="10" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
   <arc place="7" transition="11" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
     <nail xnail="0" ynail="0"/> 
     <graphics  color="0"> 
@@ -588,71 +338,6 @@ accessCount = ac[$any];]]></update>
   </arc> 
 
   <arc place="9" transition="14" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="13" transition="15" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="10" transition="15" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="14" transition="15" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="14" transition="16" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="15" transition="16" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="10" transition="16" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="15" transition="17" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="16" transition="17" type="TransitionPlace" weight="1" tokenColor="-1"> 
-     <nail xnail="0" ynail="0"/> 
-     <graphics  color="0"> 
-     </graphics> 
-  </arc> 
-
-  <arc place="6" transition="18" type="PlaceTransition" weight="1" tokenColor="-1"  inhibitingCondition=""> 
-    <nail xnail="0" ynail="0"/> 
-    <graphics  color="0"> 
-     </graphics> 
-  </arc> 
- 
-
-  <arc place="16" transition="18" type="TransitionPlace" weight="1" tokenColor="-1"> 
      <nail xnail="0" ynail="0"/> 
      <graphics  color="0"> 
      </graphics> 
