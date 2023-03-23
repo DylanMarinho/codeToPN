@@ -93,6 +93,8 @@ private:
   static Inst_t *decodeThumb5(const uint32_t inAddr, const uint16_t inCode);
   static Inst_t *decodeThumb6(const uint32_t inAddr, const uint16_t inCode);
   static Inst_t *decodeThumb7(const uint32_t inAddr, const uint16_t inCode);
+
+  static Inst_t *decodeDataProcessing(const uint32_t inAddr, const uint32_t inCode);
 };
 
 /* Decode 0 */
@@ -1203,20 +1205,87 @@ public:
     };
 };
 
+class ADDimmediate_t : public Inst_t { // encoding T3 A7.7.3
+    uint8_t nReg, dReg, imm3, i;
+    uint16_t imm8;
+    uint32_t imm32;
+
+public:
+    ADDimmediate_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+      nReg = ((inCode >> 16) & 0b1111);
+      dReg = ((inCode >> 8) & 0b1111);
+      i = ((inCode >> 26) & 0b1);
+      imm3 = ((inCode >> 12) & 0b111);
+      imm8 = ((inCode) & 0b11111111);
+
+      imm32 = (i << 3 << 8) | (imm3 << 8 ) | imm8;
+    }
+
+    virtual void Print() { printf("%x: add.w r%d, r%d, #%d", addr, dReg, nReg, imm32); }
+
+    virtual void romeoFuncContent() {
+      wReg(dReg);
+      pReg(nReg);
+      printf(" + %d;\n", imm32);
+      updateSR(dReg);
+      printf("\n");
+    };
+};
+
+Inst_t *Inst_t::decodeDataProcessing(const uint32_t inAddr, const uint32_t inCode) {
+  const uint8_t op = ((inCode >> 16 >> 4) & 0b11111);
+  const uint8_t rn = ((inCode >> 16) & 0b1111);
+  const uint8_t rd = ((inCode >> 8) & 0b1111);
+  const uint8_t releventop = ((op >> 1) & 0b1111);
+
+  switch (releventop) {
+    case 0b1000:
+      if (rd == 0b1111) {
+        printf("Unsupported data processing operation 1 (%b @ |0x%.8x|)\n", inCode, inAddr);
+      } else {
+        return new ADDimmediate_t(inAddr, inCode);
+        break;
+      }
+      break;
+    default:
+      printf("Unsupported data processing operation 2 (%b @ |0x%.8x|)\n", inCode, inAddr);
+      break;
+  }
+  return NULL;
+}
+
 Inst_t *Inst_t::decodeARM32(const uint32_t inAddr, const uint32_t inCode) {
-  const uint32_t codop = ((inCode >> 27) & 0b11);
+  const uint32_t codop = ((inCode >> 27) & 0b11); // op1 in ARM documentation
   //  printf("%x, %x\n", inCode, codop);
   uint32_t subCodop;
   switch (codop) {
-  case 2:
-    subCodop = ((inCode >> 13) & 0b10) | ((inCode >> 12) & 0b01);
-    switch (subCodop) {
-    case 3:
-      return new BL_t(inAddr, inCode);
-      break;
-    }
-    printf("Unsupported subCodop : %d (%b @ |0x%.8x|)\n", subCodop, inCode, inAddr);
-    break;
+    case 2: { // op1 = 10
+      uint8_t op = ((inCode >> 15) & 0b1); // op in ARM documentation
+      if (op == 1) {
+        subCodop = ((inCode >> 13) & 0b10) | ((inCode >> 12) & 0b01);
+        switch (subCodop) {
+          case 3:
+            return new BL_t(inAddr, inCode);
+            break;
+          default:
+            printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
+            break;
+        }
+      } else if (op == 0) {
+        const uint8_t partcodOp2 = ((inCode >> 26) & 0b1);
+        switch (partcodOp2) {
+          case 0:
+            return Inst_t::decodeDataProcessing(inAddr, inCode);
+            break;
+          case 1:
+            printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
+            break;
+          default:
+            printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
+            break;
+        }
+      } else { printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr); }
+  }
   case 3: {
     const uint32_t codOp2 = ((inCode >> 20) & 0b1111111);
     if ((!(codOp2 >> 6)) && (codOp2 >> 4 & 0b11) && !(codOp2 & 0b1)) { //codeOp2 = 0110xxx
