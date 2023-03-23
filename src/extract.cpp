@@ -508,7 +508,7 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
     //   break;
   }
   printf("Unsupported instruction bits 12-11: %d\n", primOpCode);
-  printf("Instruction %d @ %d", inCode, inAddr);
+  printf("Instruction %b @ |0x%.8x|", inCode, inAddr);
   return NULL;
 }
 
@@ -742,11 +742,11 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
           return new NOP_t(inAddr, inCode);
           break;
         default:
-          printf("Unsupported Miscellaneous instruction (if-then and hints):  %d @ %d \n", inCode, inAddr);
+          printf("Unsupported Miscellaneous instruction (if-then and hints):  %b @ |0x%.8x| \n", inCode, inAddr);
       }
       break;
     default:
-      printf("Unsupported Miscellaneous instruction : %d @ %d \n", inCode, inAddr);
+      printf("Unsupported Miscellaneous instruction : %b @ |0x%.8x| \n", inCode, inAddr);
     }
   } else {
     if (inCode & (1 << 11))
@@ -1062,7 +1062,7 @@ Inst_t *Inst_t::decodeThumb6(const uint32_t inAddr, const uint16_t inCode) {
     case 0b1111:
       break;
     default:
-        printf("Unsupported operation.");
+        printf("Unsupported operation: %b @ |0x%.8x|\n", inCode, inAddr);
     }
   } else {
     if (inCode & (1 << 11))
@@ -1215,7 +1215,7 @@ Inst_t *Inst_t::decodeARM32(const uint32_t inAddr, const uint32_t inCode) {
       return new BL_t(inAddr, inCode);
       break;
     }
-    printf("Unsupported subCodop : %d", subCodop);
+    printf("Unsupported subCodop : %d (%b @ |0x%.8x|)\n", subCodop, inCode, inAddr);
     break;
   case 3: {
     const uint32_t codOp2 = ((inCode >> 20) & 0b1111111);
@@ -1234,12 +1234,12 @@ Inst_t *Inst_t::decodeARM32(const uint32_t inAddr, const uint32_t inCode) {
       }
       }
       else {
-        printf("Unsupported operation: %d @ %d (2)\n", inCode, inAddr);
+        printf("Unsupported operation: %b @ |0x%.8x| (2)\n", inCode, inAddr);
       }
     break;
   }
   default:
-    printf("Unsupported operation: %d @ %d\n", inCode, inAddr);
+    printf("Unsupported operation: %b @ |0x%.8x|\n", inCode, inAddr);
   }
   return NULL;
 }
