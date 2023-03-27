@@ -910,6 +910,16 @@ public:
   virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #eqeq Zmask)"; }
 };
 
+class BLS_t : public CONDBR_t {
+public:
+    BLS_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
+    virtual void Print() {
+      printf("%x: bls.n ", addr);
+      PrintOffset();
+    }
+    virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #eqeq Zmask) || ((st[$any].regs.sr & Cmask) #noteq Cmask)"; }
+};
+
 class BGE_t : public CONDBR_t {
 public:
   BGE_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
@@ -1052,6 +1062,9 @@ Inst_t *Inst_t::decodeThumb6(const uint32_t inAddr, const uint16_t inCode) {
       break;
     case 0b0001:
       return new BNE_t(inAddr, inCode);
+      break;
+    case 0b1001:
+      return new BLS_t(inAddr, inCode);
       break;
     case 0b1010:
       return new BGE_t(inAddr, inCode);
