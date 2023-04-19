@@ -95,6 +95,7 @@ private:
   static Inst_t *decodeThumb7(const uint32_t inAddr, const uint16_t inCode);
 
   static Inst_t *decodeDataProcessing(const uint32_t inAddr, const uint32_t inCode);
+  static Inst_t *decodeLoadStoreMultiple(const uint32_t inAddr, const uint32_t inCode);
 };
 
 /* Decode 0 */
@@ -1267,11 +1268,77 @@ Inst_t *Inst_t::decodeDataProcessing(const uint32_t inAddr, const uint32_t inCod
   return NULL;
 }
 
+class LOADMultiple_t : public Inst_t {
+    uint8_t w, nReg, p, m;
+    uint16_t listReg;
+
+public:
+    LOADMultiple_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+      w = (inCode >> 16 >> 5) & 0b1;
+      p = (inCode >> 15) & 0b1;
+      m = (inCode >> 14) & 0b1;
+      nReg = (inCode >> 16) & 0b1111;
+      listReg = (inCode) & 0b1111111111111;
+    }
+
+    virtual void Print() { printf("TODO"); }
+
+    virtual uint8_t memAccessCount() { return 1; }
+
+    virtual void romeoFuncContent() {
+
+    }
+};
+
+Inst_t *Inst_t::decodeLoadStoreMultiple(const uint32_t inAddr, const uint32_t inCode) {
+  const uint8_t op = ((inCode >> 16 >> 7) & 0b11);
+  const uint8_t w = ((inCode >> 16 >> 5) & 0b1);
+  const uint8_t l = ((inCode >> 16 >> 4) & 0b1);
+  const uint8_t rn = ((op >> 16) & 0b1111);
+
+  uint8_t releventWRn = (w << 4) | rn;
+
+  switch (op) {
+    case 0b01: {
+      switch (l) {
+        case 1: {
+          switch (releventWRn) {
+            case 0b11101:
+              printf("Unsupported store/load multiple operation(%b @ |0x%.8x|)\n", inCode, inAddr);
+              break;
+            default:
+              return new LOADMultiple_t(inAddr, inCode);
+              break;
+          }
+          break;
+        }
+        default:
+          printf("Unsupported store/load multiple operation(%b @ |0x%.8x|)\n", inCode, inAddr);
+          break;
+      }
+      break;
+    }
+    default:
+      printf("Unsupported store/load multiple (%b @ |0x%.8x|)\n", inCode, inAddr);
+      break;
+  }
+  return NULL;
+}
+
 Inst_t *Inst_t::decodeARM32(const uint32_t inAddr, const uint32_t inCode) {
   const uint32_t codop = ((inCode >> 27) & 0b11); // op1 in ARM documentation
   //  printf("%x, %x\n", inCode, codop);
   uint32_t subCodop;
   switch (codop) {
+    case 1: { // op1 = 01
+      uint16_t op2 =  ((inCode >> 16 >> 4) & 0b1111111); // op2 in ARM documentation
+      if((op2 & 0b1100100) == 0b0000000 ) {// Load/store mulitple, op2 = 00xx0xx
+        return Inst_t::decodeLoadStoreMultiple(inAddr, inCode);
+      }
+      else {
+        printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
+      }
+    }
     case 2: { // op1 = 10
       uint8_t op = ((inCode >> 15) & 0b1); // op in ARM documentation
       if (op == 1) {
