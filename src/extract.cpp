@@ -9,13 +9,18 @@
 
 using namespace std;
 
+/*===========================================================================*/
+
 class Word_t {
 public:
   uint32_t addr;
   uint32_t value;
 
-  Word_t(const uint32_t inAddr, const uint32_t inValue) : addr(inAddr), value(inValue) {}
+  Word_t(const uint32_t inAddr, const uint32_t inValue)
+      : addr(inAddr), value(inValue) {}
 };
+
+/*===========================================================================*/
 
 class Inst_t {
 protected:
@@ -41,7 +46,8 @@ protected:
   }
 
 public:
-  Inst_t(const uint32_t inAddr) : reachable(false), addr(inAddr), mPlaceId(0), mTransitionId(0) {}
+  Inst_t(const uint32_t inAddr)
+      : reachable(false), addr(inAddr), mPlaceId(0), mTransitionId(0) {}
   static Inst_t *decodeThumb(const uint32_t inAddr, const uint16_t inCode);
   static Inst_t *decodeARM32(const uint32_t inAddr, const uint32_t inCode);
 
@@ -51,7 +57,9 @@ public:
   virtual const char *guard() { return ""; }
   void setPlaceId(const uint32_t inPlaceId) { mPlaceId = inPlaceId; }
   uint32_t placeId() { return mPlaceId; }
-  void setTransitionId(const uint32_t inTransitionId) { mTransitionId = inTransitionId; }
+  void setTransitionId(const uint32_t inTransitionId) {
+    mTransitionId = inTransitionId;
+  }
   uint32_t transitionId() { return mTransitionId; }
   virtual void setTransitionIdTaken(const uint32_t inTransitionId) {}
   virtual uint32_t transitionIdTaken() { return 0; }
@@ -80,9 +88,15 @@ public:
   }
   void wReg(uint8_t reg) { printf("  core.regs.r[%d] = ", reg); }
   void pReg(uint8_t reg) { printf("core.regs.r[%d]", reg); }
-  void updateSR(uint8_t reg) { printf("  updateSR(core.regs, core.regs.r[%d]);", reg); }
-  void updateSRVal(const uint32_t val) { printf("  updateSR(core.regs, %d);", val); }
-  void updateSRExp(const char *val) { printf("  updateSR(core.regs, %s);", val); }
+  const char *pRegS(uint8_t reg) {
+    static char buf[40];
+    snprintf(buf, 40, "core.regs.r[%d]", reg);
+    return buf;
+  }
+
+  void updateSR(const char *val, const char *op1, const char *op2) {
+    printf("  updateSR(core.regs, %s, %s, %s);\n", val, op1, op2);
+  }
 
 private:
   static Inst_t *decodeThumb0(const uint32_t inAddr, const uint16_t inCode);
@@ -94,9 +108,15 @@ private:
   static Inst_t *decodeThumb6(const uint32_t inAddr, const uint16_t inCode);
   static Inst_t *decodeThumb7(const uint32_t inAddr, const uint16_t inCode);
 
-  static Inst_t *decodeDataProcessing(const uint32_t inAddr, const uint32_t inCode);
-  static Inst_t *decodeLoadStoreMultiple(const uint32_t inAddr, const uint32_t inCode);
+  static Inst_t *decodeDataProcessing(const uint32_t inAddr,
+                                      const uint32_t inCode);
+  static Inst_t *decodeLoadStore32_1(const uint32_t inAddr,
+                                     const uint32_t inCode);
+  static Inst_t *decodeLoadStoreMultiple(const uint32_t inAddr,
+                                         const uint32_t inCode);
 };
+
+/*===========================================================================*/
 
 /* Decode 0 */
 
@@ -113,8 +133,7 @@ public:
     wReg(dReg);
     pReg(sReg);
     printf(";\n");
-    updateSR(dReg);
-    printf("\n");
+    updateSR(pRegS(dReg), pRegS(sReg), pRegS(sReg));
   };
 };
 
@@ -127,7 +146,9 @@ public:
     dReg = inCode & 0b111;
     imm5 = (inCode >> 6) & 0b11111;
   }
-  virtual void Print() { printf("%x: lsl r%d, r%d, #%d", addr, dReg, sReg, imm5); }
+  virtual void Print() {
+    printf("%x: lsl r%d, r%d, #%d", addr, dReg, sReg, imm5);
+  }
   virtual void romeoFuncContent() {
     wReg(dReg);
     pReg(sReg);
@@ -145,7 +166,9 @@ public:
     dReg = inCode & 0b111;
     imm5 = (inCode >> 6) & 0b11111;
   }
-  virtual void Print() { printf("%x: lsr r%d, r%d, #%d", addr, dReg, sReg, imm5); }
+  virtual void Print() {
+    printf("%x: lsr r%d, r%d, #%d", addr, dReg, sReg, imm5);
+  }
   virtual void romeoFuncContent() {
     wReg(dReg);
     pReg(sReg);
@@ -163,7 +186,9 @@ public:
     dReg = inCode & 0b111;
     imm5 = (inCode >> 6) & 0b11111;
   }
-  virtual void Print() { printf("%x: asr r%d, r%d, #%d", addr, dReg, sReg, imm5); }
+  virtual void Print() {
+    printf("%x: asr r%d, r%d, #%d", addr, dReg, sReg, imm5);
+  }
   virtual void romeoFuncContent() {
     wReg(dReg);
     pReg(sReg);
@@ -181,7 +206,9 @@ public:
     dReg = inCode & 0b111;
     imm5 = (inCode >> 6) & 0b11111;
   }
-  virtual void Print() { printf("%x: sub r%d, r%d, #%d", addr, dReg, sReg, imm5); }
+  virtual void Print() {
+    printf("%x: sub r%d, r%d, #%d", addr, dReg, sReg, imm5);
+  }
 };
 
 class ADDR_t : public Inst_t {
@@ -194,7 +221,9 @@ public:
     imm3 = (inCode >> 6) & 0b111;
   }
 
-  virtual void Print() { printf("%x: add r%d, r%d, #%d", addr, dReg, sReg, imm3); }
+  virtual void Print() {
+    printf("%x: add r%d, r%d, #%d", addr, dReg, sReg, imm3);
+  }
 
   virtual void romeoFuncContent() {
     wReg(dReg);
@@ -229,6 +258,8 @@ Inst_t *Inst_t::decodeThumb0(const uint32_t inAddr, const uint16_t inCode) {
   return NULL;
 }
 
+/*===========================================================================*/
+
 /* Decode 1 */
 
 class MOV_t : public Inst_t {
@@ -241,10 +272,10 @@ public:
   }
   virtual void Print() { printf("%x: movs r%d, #%d", addr, dReg, imm8); }
   virtual void romeoFuncContent() {
+    printf("  op = %d;\n", imm8);
     wReg(dReg);
-    printf("%d;\n", imm8);
-    updateSR(dReg);
-    printf("\n");
+    printf("op;\n");
+    updateSR(pRegS(dReg), "op", "op");
   };
 };
 
@@ -260,12 +291,11 @@ public:
   virtual void Print() { printf("%x: cmp r%d, #%d", addr, dReg, imm8); }
 
   virtual void romeoFuncContent() {
-    printf("  uint32_t val = ");
+    printf("  uint64_t op1 = ");
     pReg(dReg);
-    printf(" - ");
-    printf("%d;\n", imm8);
-    updateSRExp("val");
-    printf("\n");
+    printf(";\n  uint64_t op2 = %d;\n", imm8);
+    printf("  uint64_t val = op1 - op2;\n");
+    updateSR("val", "op1", "-op2");
   };
 };
 
@@ -280,11 +310,13 @@ public:
   virtual void Print() { printf("%x: adds r%d, #%d", addr, dReg, imm8); }
 
   virtual void romeoFuncContent() {
-    wReg(dReg);
+    printf("  uint64_t op1 = ");
     pReg(dReg);
-    printf(" + %d;\n", imm8);
-    updateSR(dReg);
-    printf("\n");
+    printf(";\n  uint64_t op2 = %d;\n", imm8);
+    printf("  uint64_t val = op1 + op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "op2");
   };
 };
 
@@ -300,11 +332,13 @@ public:
   virtual void Print() { printf("%x: subs r%d, #%d", addr, dReg, imm8); }
 
   virtual void romeoFuncContent() {
-    wReg(dReg);
+    printf("  uint64_t op1 = ");
     pReg(dReg);
-    printf(" - %d;\n", imm8);
-    updateSR(dReg);
-    printf("\n");
+    printf(";\n  uint64_t op2 = %d;\n", imm8);
+    printf("  uint64_t val = op1 - op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "-op2");
   };
 };
 
@@ -327,6 +361,8 @@ Inst_t *Inst_t::decodeThumb1(const uint32_t inAddr, const uint16_t inCode) {
   return NULL;
 }
 
+/*===========================================================================*/
+
 /* Decode 2 */
 
 class LDRPC_t : public Inst_t {
@@ -341,7 +377,9 @@ public:
   }
   virtual bool isLDRPC() { return true; }
   virtual uint32_t targetWord() { return addr + 2 + imm8 * 4; }
-  virtual void Print() { printf("%x: ldr r%d, [pc, #%d]", addr, dReg, imm8 << 2); }
+  virtual void Print() {
+    printf("%x: ldr r%d, [pc, #%d]", addr, dReg, imm8 << 2);
+  }
   virtual void setImmByPC(const uint32_t inImm) { immByPC = inImm; }
   virtual uint8_t memAccessCount() { return 1; }
   virtual void romeoFuncContent() {
@@ -360,12 +398,13 @@ public:
   }
   virtual void Print() { printf("%x: negs r%d, r%d", addr, dReg, sReg); }
   virtual void romeoFuncContent() {
-    wReg(dReg);
-    printf("0 - ");
+    printf("  uint64_t op1 = 0;\n");
+    printf("  uint64_t op2 = ");
     pReg(sReg);
-    printf(";\n");
-    updateSR(dReg);
-    printf("\n");
+    printf(";\n  uint64_t val = op1 - op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "-op2");
   };
 };
 
@@ -381,13 +420,12 @@ public:
   virtual void Print() { printf("%x: cmp r%d, r%d", addr, dReg, sReg); }
 
   virtual void romeoFuncContent() {
-    printf("  uint32_t val = ");
+    printf("  uint64_t op1 = ");
     pReg(dReg);
-    printf(" - ");
+    printf(";\n  uint64_t op2 = ");
     pReg(sReg);
-    printf(";\n");
-    updateSRExp("val");
-    printf("\n");
+    printf(";\n  uint64_t val = op1 - op2;\n");
+    updateSR("val", "op1", "-op2");
   };
 };
 
@@ -396,12 +434,17 @@ class BX_t : public Inst_t {
   uint32_t targetId;
 
 public:
-  BX_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr), targetId(0) { reg = (inCode >> 3) & 0b1111; }
+  BX_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr), targetId(0) {
+    reg = (inCode >> 3) & 0b1111;
+  }
   virtual void Print() {
     printf("%x: bx ", addr);
     printReg(reg);
   }
-  virtual void setTargetIdTaken(const uint32_t inTargetId) { targetId = inTargetId; }
+  virtual void setTargetIdTaken(const uint32_t inTargetId) {
+    targetId = inTargetId;
+  }
   virtual uint32_t targetIdTaken() { return targetId; }
   virtual bool isFuncReturn() { return reg == 14; }
 };
@@ -410,7 +453,9 @@ class BLX_t : public Inst_t {
   uint8_t reg;
 
 public:
-  BLX_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) { reg = (inCode >> 3) & 0b1111; }
+  BLX_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+    reg = (inCode >> 3) & 0b1111;
+  }
   virtual void Print() {
     printf("%x: blx ", addr);
     printReg(reg);
@@ -424,7 +469,7 @@ public:
   SDPADD_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
     Rdn = inCode & 0b111;
     dReg = ((inCode >> 4) & 0b1000) | (inCode & 0b111); // DN:Rdn
-    sReg = (inCode >> 3) & 0b1111; // Rm
+    sReg = (inCode >> 3) & 0b1111;                      // Rm
   }
   virtual void Print() {
     printf("%x: add ", addr);
@@ -433,13 +478,14 @@ public:
     printReg(sReg);
   }
   virtual void romeoFuncContent() {
-    wReg(dReg);
+    printf("  uint64_t op1 = ");
     pReg(dReg);
-    printf(" + ");
+    printf(";\n  uint64_t op2 = ");
     pReg(sReg);
-    printf(";\n");
-    updateSR(dReg);
-    printf("\n");
+    printf(";\n  uint64_t val = op1 + op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "op2");
   };
 };
 
@@ -475,9 +521,9 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
       secondOpCode = (inCode >> 8) & 0b11;
       switch (secondOpCode) {
       case 0:
-      	return new SDPADD_t(inAddr, inCode);
-      	break;
-      case 2: 
+        return new SDPADD_t(inAddr, inCode);
+        break;
+      case 2:
         return new SDPMOV_t(inAddr, inCode);
         break;
       case 3:
@@ -488,7 +534,9 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
         break;
       }
       printf("Unsupported special data processing inst: %d\n", secondOpCode);
-      printf("Dealing with instruction @%d, code %d (primOpCode: %d, secondOpCode: %d) \n", inAddr, inCode, primOpCode, secondOpCode);
+      printf("Dealing with instruction @%d, code %d (primOpCode: %d, "
+             "secondOpCode: %d) \n",
+             inAddr, inCode, primOpCode, secondOpCode);
     } else {
       secondOpCode = (inCode >> 6) & 0b1111;
       switch (secondOpCode) {
@@ -511,9 +559,11 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
     //   break;
   }
   printf("Unsupported instruction bits 12-11: %d\n", primOpCode);
-  printf("Instruction %b @ |0x%.8x|", inCode, inAddr);
+  printf("Instruction %x @ |0x%.8x|", inCode, inAddr);
   return NULL;
 }
+
+/*===========================================================================*/
 
 /* Decode 5 */
 
@@ -554,13 +604,15 @@ public:
     imm7 = (inCode & 0b1111111) << 2;
   }
   virtual void Print() { printf("%x: sub sp, #%d", addr, imm7); }
-  
+
   virtual void romeoFuncContent() {
-    wReg(13);
+    printf("  uint64_t op1 = ");
     pReg(13);
-    printf(" - %d;\n", imm7);
-    updateSR(13);
-    printf("\n");
+    printf(";\n  uint64_t op2 = %d;\n", imm7);
+    printf("  uint64_t val = op1 - op2;\n");
+    wReg(13);
+    printf("val;\n");
+    updateSR("val", "op1", "-op2");
   };
 };
 
@@ -572,13 +624,15 @@ public:
     imm7 = (inCode & 0b1111111) << 2;
   }
   virtual void Print() { printf("%x: add sp, #%d", addr, imm7); }
-  
+
   virtual void romeoFuncContent() {
-    wReg(13);
+    printf("  uint64_t op1 = ");
     pReg(13);
-    printf(" + %d;\n", imm7);
-    updateSR(13);
-    printf("\n");
+    printf(";\n  uint64_t op2 = %d;\n", imm7);
+    printf("  uint64_t val = op1 + op2;\n");
+    wReg(13);
+    printf("val;\n");
+    updateSR("val", "op1", "op2");
   };
 };
 
@@ -645,7 +699,8 @@ class POPLIST_t : public Inst_t {
   uint32_t mTargetIdTaken;
 
 public:
-  POPLIST_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr), mTargetIdTaken(0) {
+  POPLIST_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr), mTargetIdTaken(0) {
     dRegList = (inCode & 0b11111111) | ((inCode & 0b100000000) << 7);
   }
   virtual void Print() {
@@ -712,10 +767,9 @@ public:
 class NOP_t : public Inst_t {
 
 public:
-  NOP_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
-  }
+  NOP_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {}
   virtual void Print() { printf("%x: nop", addr); }
-  
+
   /*virtual void romeoFuncContent() {
   };*/
 };
@@ -724,13 +778,12 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
   if (inCode & (1 << 12)) {
     uint16_t codop = (inCode >> 8) & 0b1111;
     switch (codop) {
-    case 0b0000: 
-        if (inCode & (1 << 7)) {
-            return new SUBSP_t(inAddr, inCode);
-        }
-        else {
-            return new ADDSP_t(inAddr, inCode);
-        }
+    case 0b0000:
+      if (inCode & (1 << 7)) {
+        return new SUBSP_t(inAddr, inCode);
+      } else {
+        return new ADDSP_t(inAddr, inCode);
+      }
     case 0b0100:
     case 0b0101:
       return new PUSHLIST_t(inAddr, inCode);
@@ -741,15 +794,18 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
       break;
     case 0b1111:
       switch (inCode & 0b11111111) {
-        case 0b00000000:
-          return new NOP_t(inAddr, inCode);
-          break;
-        default:
-          printf("Unsupported Miscellaneous instruction (if-then and hints):  %b @ |0x%.8x| \n", inCode, inAddr);
+      case 0b00000000:
+        return new NOP_t(inAddr, inCode);
+        break;
+      default:
+        printf("Unsupported Miscellaneous instruction (if-then and hints):  %x "
+               "@ |0x%.8x| \n",
+               inCode, inAddr);
       }
       break;
     default:
-      printf("Unsupported Miscellaneous instruction : %b @ |0x%.8x| \n", inCode, inAddr);
+      printf("Unsupported Miscellaneous instruction : %x @ |0x%.8x| \n", inCode,
+             inAddr);
     }
   } else {
     if (inCode & (1 << 11))
@@ -760,19 +816,24 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
   return NULL;
 }
 
+/*===========================================================================*/
+
 /* Decode 3  */
 
 class STOREWORDimm_t : public Inst_t {
   uint8_t sReg, iReg, imm5;
 
 public:
-  STOREWORDimm_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+  STOREWORDimm_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr) {
     imm5 = (inCode >> 6) & 0b11111;
     sReg = inCode & 0b111;
     iReg = (inCode >> 3) & 0b111;
   }
 
-  virtual void Print() { printf("%x: str.w r%d, [r%d, #%d]", addr, sReg, iReg, imm5 << 2); }
+  virtual void Print() {
+    printf("%x: str.w r%d, [r%d, #%d]", addr, sReg, iReg, imm5 << 2);
+  }
 
   virtual uint8_t memAccessCount() { return 1; }
 
@@ -795,7 +856,9 @@ public:
     iReg = (inCode >> 3) & 0b111;
   }
 
-  virtual void Print() { printf("%x: ldr.w r%d, [r%d, #%d]", addr, dReg, iReg, imm5 << 2); }
+  virtual void Print() {
+    printf("%x: ldr.w r%d, [r%d, #%d]", addr, dReg, iReg, imm5 << 2);
+  }
 
   virtual uint8_t memAccessCount() { return 1; }
 
@@ -811,13 +874,30 @@ class STOREBYTEimm_t : public Inst_t {
   uint8_t sReg, iReg, imm5;
 
 public:
-  STOREBYTEimm_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+  STOREBYTEimm_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr) {
     imm5 = (inCode >> 6) & 0b11111;
     sReg = inCode & 0b111;
     iReg = (inCode >> 3) & 0b111;
   }
   virtual uint8_t memAccessCount() { return 1; }
-  virtual void Print() { printf("%x: str.b r%d, [r%d, #%d]", addr, sReg, iReg, imm5); }
+  virtual void Print() {
+    printf("%x: str.b r%d, [r%d, #%d]", addr, sReg, iReg, imm5);
+  }
+  virtual void romeoFuncContent() {
+    uint32_t offset = (imm5 & 0b11) << 3;
+    printf("  uint32_t addr = ");
+    pReg(iReg);
+    printf(" + %d;\n", imm5);
+    printf("  uint32_t op = (");
+    pReg(sReg);
+    printf(" & 0xFF) << %d;\n", offset);
+    uint32_t mask = 0xFF << offset;
+    uint32_t notmask = ~mask;
+    printf("  uint32_t previous = memRead(addr & 0xFFFFFFC);\n");
+    printf("  uint32_t new = (previous & 0x%X) | op;\n", notmask);
+    printf("  memWrite(mem, addr & 0xFFFFFFC, new);\n");
+  }
 };
 
 class LOADBYTEimm_t : public Inst_t {
@@ -830,7 +910,19 @@ public:
     iReg = (inCode >> 3) & 0b111;
   }
   virtual uint8_t memAccessCount() { return 1; }
-  virtual void Print() { printf("%x: ldr.b r%d, [r%d, #%d]", addr, dReg, iReg, imm5); }
+  virtual void Print() {
+    printf("%x: ldr.b r%d, [r%d, #%d]", addr, dReg, iReg, imm5);
+  }
+  virtual void romeoFuncContent() {
+    uint32_t offset = (imm5 & 0b11) << 3;
+    printf("  uint32_t addr = ");
+    pReg(iReg);
+    printf(" + %d;\n", imm5);
+    printf("  uint32_t data = (memRead(addr & 0xFFFFFFC) >> %d) & 0xFF;\n",
+           offset);
+    wReg(dReg);
+    printf(" data;\n");
+  }
 };
 
 Inst_t *Inst_t::decodeThumb3(const uint32_t inAddr, const uint16_t inCode) {
@@ -852,6 +944,80 @@ Inst_t *Inst_t::decodeThumb3(const uint32_t inAddr, const uint16_t inCode) {
   return NULL;
 }
 
+/*===========================================================================*/
+
+/* Decode 4 */
+
+class STOREHALFWORDimm_t : public Inst_t {
+  uint8_t sReg, iReg, imm5;
+
+public:
+  STOREHALFWORDimm_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr) {
+    imm5 = (inCode >> 6) & 0b11111;
+    sReg = inCode & 0b111;
+    iReg = (inCode >> 3) & 0b111;
+  }
+
+  virtual void Print() {
+    printf("%x: strh r%d, [r%d, #%d]", addr, sReg, iReg, imm5 << 2);
+  }
+
+  virtual uint8_t memAccessCount() { return 1; }
+
+  virtual void romeoFuncContent() {
+    printf("  memWrite(mem, ");
+    pReg(iReg);
+    printf(" + %d, ", imm5 << 2);
+    pReg(sReg);
+    printf(");\n");
+  }
+};
+
+class LOADHALFWORDimm_t : public Inst_t {
+  uint8_t dReg, iReg, imm5;
+
+public:
+  LOADHALFWORDimm_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr) {
+    imm5 = (inCode >> 6) & 0b11111;
+    dReg = inCode & 0b111;
+    iReg = (inCode >> 3) & 0b111;
+  }
+
+  virtual void Print() {
+    printf("%x: ldr.w r%d, [r%d, #%d]", addr, dReg, iReg, imm5 << 2);
+  }
+
+  virtual uint8_t memAccessCount() { return 1; }
+
+  virtual void romeoFuncContent() {
+    wReg(dReg);
+    printf("memRead(mem, ");
+    pReg(iReg);
+    printf(" + %d);\n", imm5 << 2);
+  }
+};
+
+Inst_t *Inst_t::decodeThumb4(const uint32_t inAddr, const uint16_t inCode) {
+  uint16_t codop = (inCode >> 11) & 0b11;
+  switch (codop) {
+  case 0b00:
+    //    return new STOREHALFWORDimm_t(inAddr, inCode);
+    break;
+  case 0b01:
+    //    return new LOADHALFWORDimm_t(inAddr, inCode);
+    break;
+  case 0b10:
+  case 0b11:
+    printf("Unsupported instruction : Load or Store to stack\n");
+    break;
+  }
+  return NULL;
+}
+
+/*===========================================================================*/
+
 /* Decode 6 */
 
 class CONDBR_t : public Inst_t {
@@ -860,12 +1026,19 @@ class CONDBR_t : public Inst_t {
   uint32_t mTargetIdTaken;
 
 public:
-  CONDBR_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr), mTargetIdTaken(0) { imm8 = inCode & 0b11111111; }
+  CONDBR_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr), mTargetIdTaken(0) {
+    imm8 = inCode & 0b11111111;
+  }
   virtual uint32_t branchAddress() { return addr + (int16_t)(imm8 * 2) + 4; }
   virtual bool isCondBranch() { return true; }
-  virtual void setTransitionIdTaken(const uint32_t inTransitionId) { mTransitionIdTaken = inTransitionId; }
+  virtual void setTransitionIdTaken(const uint32_t inTransitionId) {
+    mTransitionIdTaken = inTransitionId;
+  }
   virtual uint32_t transitionIdTaken() { return mTransitionIdTaken; }
-  virtual void setTargetIdTaken(const uint32_t inTargetId) { mTargetIdTaken = inTargetId; }
+  virtual void setTargetIdTaken(const uint32_t inTargetId) {
+    mTargetIdTaken = inTargetId;
+  }
   virtual uint32_t targetIdTaken() { return mTargetIdTaken; }
 
   void PrintOffset() { printf("%x", addr + (int16_t)(imm8 * 2) + 4); }
@@ -873,62 +1046,109 @@ public:
 
 class BNE_t : public CONDBR_t {
 public:
-  BNE_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
+  BNE_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
   virtual void Print() {
     printf("%x: bne.n ", addr);
     PrintOffset();
   }
-  virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #noteq Zmask)"; }
+  virtual const char *guard() {
+    return "((st[$any].regs.sr & Zmask) #noteq Zmask)";
+  }
 };
 
 class BLT_t : public CONDBR_t {
 public:
-    BLT_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
-    virtual void Print() {
-        printf("%x: blt.n ", addr);
-        PrintOffset();
-    }
-    virtual const char *guard() { return "(st[$any].regs.sr &  Nmask) #eqeq Nmask"; }
+  BLT_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
+  virtual void Print() {
+    printf("%x: blt.n ", addr);
+    PrintOffset();
+  }
+  virtual const char *guard() {
+    return "(st[$any].regs.sr &  Nmask) #eqeq Nmask";
+  }
+};
+
+class BCS_t : public CONDBR_t {
+public:
+  BCS_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
+  virtual void Print() {
+    printf("%x: bcs.n ", addr);
+    PrintOffset();
+  }
+  virtual const char *guard() {
+    return "((st[$any].regs.sr & Cmask) #eqeq Cmask)";
+  }
+};
+
+class BCC_t : public CONDBR_t {
+public:
+  BCC_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
+  virtual void Print() {
+    printf("%x: bcc.n ", addr);
+    PrintOffset();
+  }
+  virtual const char *guard() {
+    return "((st[$any].regs.sr & Cmask) #noteq Cmask)";
+  }
 };
 
 class BLE_t : public CONDBR_t {
 public:
-  BLE_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
+  BLE_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
   virtual void Print() {
     printf("%x: ble.n ", addr);
     PrintOffset();
   }
-  virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #eqeq Zmask) || ((st[$any].regs.sr & Nmask) #eqeq Nmask)"; }
+  virtual const char *guard() {
+    return "((st[$any].regs.sr & Zmask) #eqeq Zmask) || ((st[$any].regs.sr & "
+           "Nmask) #eqeq Nmask)";
+  }
 };
 
 class BEQ_t : public CONDBR_t {
 public:
-  BEQ_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
+  BEQ_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
   virtual void Print() {
     printf("%x: beq.n ", addr);
     PrintOffset();
   }
-  virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #eqeq Zmask)"; }
+  virtual const char *guard() {
+    return "((st[$any].regs.sr & Zmask) #eqeq Zmask)";
+  }
 };
 
 class BLS_t : public CONDBR_t {
 public:
-    BLS_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
-    virtual void Print() {
-      printf("%x: bls.n ", addr);
-      PrintOffset();
-    }
-    virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #eqeq Zmask) || ((st[$any].regs.sr & Cmask) #noteq Cmask)"; }
+  BLS_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
+  virtual void Print() {
+    printf("%x: bls.n ", addr);
+    PrintOffset();
+  }
+  virtual const char *guard() {
+    return "((st[$any].regs.sr & Zmask) #eqeq Zmask) || ((st[$any].regs.sr & "
+           "Cmask) #noteq Cmask)";
+  }
 };
 
 class BGE_t : public CONDBR_t {
 public:
-  BGE_t(const uint32_t inAddr, const uint16_t inCode) : CONDBR_t(inAddr, inCode) {}
+  BGE_t(const uint32_t inAddr, const uint16_t inCode)
+      : CONDBR_t(inAddr, inCode) {}
   virtual void Print() {
     printf("%x: bge.n ", addr);
     PrintOffset();
   }
-  virtual const char *guard() { return "((st[$any].regs.sr & Zmask) #eqeq Zmask) || ((st[$any].regs.sr & Nmask) #noteq Nmask)"; }
+  virtual const char *guard() {
+    return "((st[$any].regs.sr & Zmask) #eqeq Zmask) || ((st[$any].regs.sr & "
+           "Nmask) #noteq Nmask)";
+  }
 };
 
 class STMIA_t : public Inst_t {
@@ -1006,11 +1226,25 @@ public:
 class LDMIA_t : public Inst_t {
   uint8_t iReg;
   uint16_t sRegList;
+  bool wBack;
 
 public:
   LDMIA_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
     iReg = (inCode >> 8) & 0b111;
     sRegList = (inCode & 0b11111111) | ((inCode & 0b100000000) << 6);
+    wBack = true;
+    uint16_t rl = sRegList;
+    uint32_t regNum = 0;
+    while (rl != 0) {
+      if (rl & 1) {
+        if (regNum == iReg) {
+          wBack = false;
+          break;
+        }
+      }
+      rl >>= 1;
+      regNum++;
+    }
   }
 
   virtual uint8_t memAccessCount() {
@@ -1025,7 +1259,11 @@ public:
   }
 
   virtual void Print() {
-    printf("%x: ldmia r%d!, {", addr, iReg);
+    printf("%x: ldmia r%d", addr, iReg);
+    if (wBack) {
+      printf("!");
+    }
+    printf(", {");
     uint16_t rn = 0, rl = sRegList;
     bool first = true;
     while (rl != 0) {
@@ -1053,6 +1291,29 @@ public:
     }
     printf("}");
   }
+
+  virtual void romeoFuncContent() {
+    uint16_t regList = sRegList;
+    uint8_t regNum = 0;
+    uint8_t regCount = 0;
+    while (regList != 0) {
+      if (regList & 1) {
+        wReg(regNum);
+        printf("  memRead(mem,");
+        pReg(iReg);
+        printf(" + %d", regCount * 4);
+        printf(");\n");
+        regCount++;
+      }
+      regList >>= 1;
+      regNum++;
+    }
+    if (wBack) {
+      wReg(iReg);
+      pReg(iReg);
+      printf(" + %d;\n", regCount * 4);
+    }
+  };
 };
 
 Inst_t *Inst_t::decodeThumb6(const uint32_t inAddr, const uint16_t inCode) {
@@ -1064,6 +1325,12 @@ Inst_t *Inst_t::decodeThumb6(const uint32_t inAddr, const uint16_t inCode) {
     case 0b0001:
       return new BNE_t(inAddr, inCode);
       break;
+    case 0b0010:
+      return new BCS_t(inAddr, inCode);
+      break;
+    case 0b0011:
+      return new BCC_t(inAddr, inCode);
+      break;
     case 0b1001:
       return new BLS_t(inAddr, inCode);
       break;
@@ -1072,13 +1339,14 @@ Inst_t *Inst_t::decodeThumb6(const uint32_t inAddr, const uint16_t inCode) {
       break;
     case 0b1011:
       return new BLT_t(inAddr, inCode);
+      break;
     case 0b1101:
       return new BLE_t(inAddr, inCode);
       break;
     case 0b1111:
       break;
     default:
-        printf("Unsupported operation: %b @ |0x%.8x|\n", inCode, inAddr);
+      printf("Unsupported operation: %x @ |0x%.8x|\n", inCode, inAddr);
     }
   } else {
     if (inCode & (1 << 11))
@@ -1094,11 +1362,16 @@ class BA_t : public Inst_t {
   uint32_t mTargetIdTaken;
 
 public:
-  BA_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr), mTargetIdTaken(0) { imm11 = inCode & 0b11111111111; }
+  BA_t(const uint32_t inAddr, const uint16_t inCode)
+      : Inst_t(inAddr), mTargetIdTaken(0) {
+    imm11 = inCode & 0b11111111111;
+  }
   virtual bool isUncondBranch() { return true; }
   virtual uint32_t branchAddress() { return addr + 4 + imm11 * 2; }
   virtual void Print() { printf("%x: b.n %x", addr, branchAddress()); }
-  virtual void setTargetIdTaken(const uint32_t inTargetId) { mTargetIdTaken = inTargetId; }
+  virtual void setTargetIdTaken(const uint32_t inTargetId) {
+    mTargetIdTaken = inTargetId;
+  }
   virtual uint32_t targetIdTaken() { return mTargetIdTaken; }
 };
 
@@ -1127,9 +1400,9 @@ Inst_t *Inst_t::decodeThumb(const uint32_t inAddr, const uint16_t inCode) {
   case 3:
     return decodeThumb3(inAddr, inCode);
     break;
-  // case 4:
-  //   return decodeThumb4(inAddr, inCode);
-  //   break;
+  case 4:
+    return decodeThumb4(inAddr, inCode);
+    break;
   case 5:
     return decodeThumb5(inAddr, inCode);
     break;
@@ -1141,6 +1414,7 @@ Inst_t *Inst_t::decodeThumb(const uint32_t inAddr, const uint16_t inCode) {
     break;
   default:
     printf("Unsupported instruction 3 higher bits: %d\n", mostSig3Bits);
+    printf("    Code = %x\n", inCode);
   }
   return NULL;
 }
@@ -1150,7 +1424,8 @@ class BL_t : public Inst_t {
   uint32_t mTargetIdTaken;
 
 public:
-  BL_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr), mTargetIdTaken(0) {
+  BL_t(const uint32_t inAddr, const uint32_t inCode)
+      : Inst_t(inAddr), mTargetIdTaken(0) {
     uint32_t S = (inCode >> 26) & 1;
     uint32_t J1 = (inCode >> 13) & 1;
     uint32_t J2 = (inCode >> 11) & 1;
@@ -1169,158 +1444,324 @@ public:
   virtual bool isFuncCall() { return true; }
   virtual uint32_t branchAddress() { return addr + 4 + offset; }
   virtual void Print() { printf("%x: bl %x", addr, addr + 4 + offset); }
-  virtual void setTargetIdTaken(const uint32_t inTargetId) { mTargetIdTaken = inTargetId; }
+  virtual void setTargetIdTaken(const uint32_t inTargetId) {
+    mTargetIdTaken = inTargetId;
+  }
   virtual uint32_t targetIdTaken() { return mTargetIdTaken; }
 };
 
 class MUL_t : public Inst_t {
-    uint8_t nReg, dReg, mReg;
+  uint8_t nReg, dReg, mReg;
 
 public:
-    MUL_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
-      nReg = ((inCode >> 16) & 0b1111);
-      dReg = ((inCode >> 8) & 0b1111);
-      mReg = ((inCode) & 0b1111);
-    }
+  MUL_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+    nReg = ((inCode >> 16) & 0b1111);
+    dReg = ((inCode >> 8) & 0b1111);
+    mReg = ((inCode)&0b1111);
+  }
 
-    virtual void Print() { printf("%x: mul r%d, r%d, r%d", addr, dReg, nReg, mReg); }
+  virtual void Print() {
+    printf("%x: mul r%d, r%d, r%d", addr, dReg, nReg, mReg);
+  }
 
-    virtual void romeoFuncContent() {
-      wReg(dReg);
-      pReg(nReg);
-      printf("*");
-      pReg(mReg);
-      printf(";\n");
-      updateSR(dReg);
-      printf("\n");
-    };
+  virtual void romeoFuncContent() {
+    printf("  uint64_t op1 = ");
+    pReg(nReg);
+    printf(";\n  uint64_t op2 = ");
+    pReg(mReg);
+    printf("  uint64_t val = op1 * op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "op2"); // not sure for V
+  };
 };
 
 class SDIV_t : public Inst_t {
-    uint8_t nReg, dReg, mReg;
+  uint8_t nReg, dReg, mReg;
 
 public:
-    SDIV_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
-      nReg = ((inCode >> 16) & 0b1111);
-      dReg = ((inCode >> 8) & 0b1111);
-      mReg = ((inCode) & 0b1111);
-    }
+  SDIV_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+    nReg = ((inCode >> 16) & 0b1111);
+    dReg = ((inCode >> 8) & 0b1111);
+    mReg = ((inCode)&0b1111);
+  }
 
-    virtual void Print() { printf("%x: sdiv r%d, r%d, r%d", addr, dReg, nReg, mReg); }
+  virtual void Print() {
+    printf("%x: sdiv r%d, r%d, r%d", addr, dReg, nReg, mReg);
+  }
 
-    virtual void romeoFuncContent() {
-      wReg(dReg);
-      pReg(nReg);
-      printf("/");
-      pReg(mReg);
-      printf(";\n");
-      updateSR(dReg);
-      printf("\n");
-    };
+  virtual void romeoFuncContent() {
+    printf("  uint64_t op1 = ");
+    pReg(nReg);
+    printf(";\n  uint64_t op2 = ");
+    pReg(mReg);
+    printf("  uint64_t val = op1 / op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "op2"); // not sure for V
+  };
 };
 
 class ADDimmediate_t : public Inst_t { // encoding T3 A7.7.3
-    uint8_t nReg, dReg, imm3, i;
-    uint16_t imm8;
-    uint32_t imm32;
+  uint8_t nReg, dReg, imm3, i;
+  uint16_t imm8;
+  uint32_t imm32;
 
 public:
-    ADDimmediate_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
-      nReg = ((inCode >> 16) & 0b1111);
-      dReg = ((inCode >> 8) & 0b1111);
-      i = ((inCode >> 26) & 0b1);
-      imm3 = ((inCode >> 12) & 0b111);
-      imm8 = ((inCode) & 0b11111111);
+  ADDimmediate_t(const uint32_t inAddr, const uint32_t inCode)
+      : Inst_t(inAddr) {
+    nReg = ((inCode >> 16) & 0b1111);
+    dReg = ((inCode >> 8) & 0b1111);
+    i = ((inCode >> 26) & 0b1);
+    imm3 = ((inCode >> 12) & 0b111);
+    imm8 = ((inCode)&0b11111111);
 
-      imm32 = (i << 3 << 8) | (imm3 << 8 ) | imm8;
-    }
+    imm32 = (i << 3 << 8) | (imm3 << 8) | imm8;
+  }
 
-    virtual void Print() { printf("%x: add.w r%d, r%d, #%d", addr, dReg, nReg, imm32); }
+  virtual void Print() {
+    printf("%x: add.w r%d, r%d, #%d", addr, dReg, nReg, imm32);
+  }
 
-    virtual void romeoFuncContent() {
-      wReg(dReg);
-      pReg(nReg);
-      printf(" + %d;\n", imm32);
-      updateSR(dReg);
-      printf("\n");
-    };
+  virtual void romeoFuncContent() {
+    printf("  uint64_t op1 = ");
+    pReg(nReg);
+    printf(";\n  uint64_t op2 = %d;\n", imm32);
+    printf("  uint64_t val = op1 + op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "op2");
+  };
 };
 
-Inst_t *Inst_t::decodeDataProcessing(const uint32_t inAddr, const uint32_t inCode) {
+Inst_t *Inst_t::decodeDataProcessing(const uint32_t inAddr,
+                                     const uint32_t inCode) {
   const uint8_t op = ((inCode >> 16 >> 4) & 0b11111);
   const uint8_t rn = ((inCode >> 16) & 0b1111);
   const uint8_t rd = ((inCode >> 8) & 0b1111);
   const uint8_t releventop = ((op >> 1) & 0b1111);
 
   switch (releventop) {
-    case 0b1000:
-      if (rd == 0b1111) {
-        printf("Unsupported data processing operation 1 (%b @ |0x%.8x|)\n", inCode, inAddr);
-      } else {
-        return new ADDimmediate_t(inAddr, inCode);
-        break;
-      }
+  case 0b1000:
+    if (rd == 0b1111) {
+      printf("Unsupported data processing operation 1 (%x @ |0x%.8x|)\n",
+             inCode, inAddr);
+    } else {
+      return new ADDimmediate_t(inAddr, inCode);
       break;
-    default:
-      printf("Unsupported data processing operation 2 (%b @ |0x%.8x|)\n", inCode, inAddr);
-      break;
+    }
+    break;
+  default:
+    printf("Unsupported data processing operation 2 (%x @ |0x%.8x|)\n", inCode,
+           inAddr);
+    break;
   }
   return NULL;
 }
 
-class LOADMultiple_t : public Inst_t {
-    uint8_t w, nReg, p, m;
-    uint16_t listReg;
+class LDMIA32_t : public Inst_t {
+  bool wBack;
+  uint8_t iReg;
+  uint8_t regCount;
+  uint16_t sRegList;
 
 public:
-    LOADMultiple_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
-      w = (inCode >> 16 >> 5) & 0b1;
-      p = (inCode >> 15) & 0b1;
-      m = (inCode >> 14) & 0b1;
-      nReg = (inCode >> 16) & 0b1111;
-      listReg = (inCode) & 0b1111111111111;
+  LDMIA32_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+    wBack = ((inCode >> 16) >> 5) & 0b1;
+    iReg = (inCode >> 16) & 0b1111;
+    sRegList = inCode & 0b1111111111111111;
+    uint16_t rl = sRegList;
+    regCount = 0;
+    while (rl != 0) {
+      if (rl & 0b1) {
+        regCount++;
+      }
+      rl >>= 1;
     }
+  }
 
-    virtual void Print() { printf("TODO"); }
+  virtual uint8_t memAccessCount() { return regCount; }
 
-    virtual uint8_t memAccessCount() { return 1; }
-
-    virtual void romeoFuncContent() {
-
+  virtual void Print() {
+    printf("%x: ldmia.w r%d", addr, iReg);
+    if (wBack) {
+      printf("!");
     }
+    printf(", {");
+    uint16_t rn = 0, rl = sRegList;
+    bool first = true;
+    while (rl != 0) {
+      if (rl & 1) {
+        if (first)
+          first = false;
+        else
+          printf(", ");
+        switch (rn) {
+        case 13:
+          printf("sp");
+          break;
+        case 14:
+          printf("lr");
+          break;
+        case 15:
+          printf("pc");
+          break;
+        default:
+          printf("r%d", rn);
+        }
+      }
+      rl >>= 1;
+      rn++;
+    }
+    printf("}");
+  }
+
+  virtual void romeoFuncContent() {
+    uint32_t regList = sRegList;
+    uint32_t regNum = 0;
+    uint32_t offset = 0;
+    while (regList != 0) {
+      if (regList & 1) {
+        wReg(regNum);
+        printf("  memRead(mem,");
+        pReg(iReg);
+        printf(" + %d", offset * 4);
+        printf(");\n");
+        offset++;
+      }
+      regList >>= 1;
+      regNum++;
+    }
+    if (wBack) {
+      wReg(iReg);
+      pReg(iReg);
+      printf(" + %d;\n", regCount * 4);
+    }
+  };
 };
 
-Inst_t *Inst_t::decodeLoadStoreMultiple(const uint32_t inAddr, const uint32_t inCode) {
-  const uint8_t op = ((inCode >> 16 >> 7) & 0b11);
-  const uint8_t w = ((inCode >> 16 >> 5) & 0b1);
-  const uint8_t l = ((inCode >> 16 >> 4) & 0b1);
-  const uint8_t rn = ((op >> 16) & 0b1111);
+class STMIA32_t : public Inst_t {
+  bool wBack;
+  uint8_t iReg;
+  uint8_t regCount;
+  uint16_t sRegList;
 
-  uint8_t releventWRn = (w << 4) | rn;
+public:
+  STMIA32_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
+    wBack = ((inCode >> 16) >> 5) & 0b1;
+    iReg = (inCode >> 16) & 0b1111;
+    sRegList = inCode & 0b1111111111111111;
+    uint16_t rl = sRegList;
+    regCount = 0;
+    while (rl != 0) {
+      if (rl & 0b1) {
+        regCount++;
+      }
+      rl >>= 1;
+    }
+  }
 
-  switch (op) {
-    case 0b01: {
-      switch (l) {
-        case 1: {
-          switch (releventWRn) {
-            case 0b11101:
-              printf("Unsupported store/load multiple operation(%b @ |0x%.8x|)\n", inCode, inAddr);
-              break;
-            default:
-              return new LOADMultiple_t(inAddr, inCode);
-              break;
-          }
+  virtual void Print() {
+    printf("%x: stmia.w r%d", addr, iReg);
+    if (wBack) {
+      printf("!");
+    }
+    printf(", {");
+    uint16_t rn = 0, rl = sRegList;
+    bool first = true;
+    while (rl != 0) {
+      if (rl & 1) {
+        if (first)
+          first = false;
+        else
+          printf(", ");
+        switch (rn) {
+        case 13:
+          printf("sp");
           break;
-        }
+        case 14:
+          printf("lr");
+          break;
+        case 15:
+          printf("pc");
+          break;
         default:
-          printf("Unsupported store/load multiple operation(%b @ |0x%.8x|)\n", inCode, inAddr);
-          break;
+          printf("r%d", rn);
+        }
+      }
+      rl >>= 1;
+      rn++;
+    }
+    printf("}");
+  }
+
+  virtual uint8_t memAccessCount() { return regCount; }
+
+  virtual void romeoFuncContent() {
+    uint16_t regList = sRegList;
+    uint8_t regNum = 0;
+    uint8_t offset = 0;
+    while (regList != 0) {
+      if (regList & 1) {
+        printf("  memWrite(mem,");
+        pReg(iReg);
+        printf(" + %d, ", offset * 4);
+        pReg(regNum);
+        printf(");\n");
+        offset++;
+      }
+      regList >>= 1;
+      regNum++;
+    }
+    if (wBack) {
+      wReg(iReg);
+      pReg(iReg);
+      printf(" + %d;\n", regCount * 4);
+    }
+  };
+};
+
+/*
+ * Load and Store Double and Exclusive, and Table branch
+ * Load and Store Multiple, RFE and SRS.
+ */
+Inst_t *Inst_t::decodeLoadStore32_1(const uint32_t inAddr,
+                                    const uint32_t inCode) {
+  const uint32_t codop = ((inCode >> 16) >> 6) & 0b1;
+  uint32_t subCodop, subCodop2;
+  if (codop == 0) {
+    /* Load and Store Multiple, RFE and SRS. */
+    subCodop = ((inCode >> 16) >> 7) & 0b11; /* VU or UU */
+    subCodop2 = ((inCode >> 16) >> 4) & 0b1; /* L */
+    switch (subCodop) {
+    case 0b01:
+      if (subCodop2 == 1) {
+        /* STMIA.W */
+        return new LDMIA32_t(inAddr, inCode);
+      } else {
+        /* STMIA.W */
+        return new STMIA32_t(inAddr, inCode);
       }
       break;
-    }
-    default:
-      printf("Unsupported store/load multiple (%b @ |0x%.8x|)\n", inCode, inAddr);
+    case 0b10:
+      if (subCodop2 == 1) {
+        /* STMDB.W */
+        printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+      } else {
+        /* STMDB.W */
+        printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+      }
       break;
+      break;
+    case 0b00:
+    case 0b11:
+      /* RFE and SRS */
+      printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+      break;
+    }
+  } else {
+    /* Load and Store Double and Exclusive, and Table branch */
+    printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
   }
   return NULL;
 }
@@ -1330,79 +1771,96 @@ Inst_t *Inst_t::decodeARM32(const uint32_t inAddr, const uint32_t inCode) {
   //  printf("%x, %x\n", inCode, codop);
   uint32_t subCodop;
   switch (codop) {
-    case 1: { // op1 = 01
-      uint16_t op2 =  ((inCode >> 16 >> 4) & 0b1111111); // op2 in ARM documentation
-      if((op2 & 0b1100100) == 0b0000000 ) {// Load/store mulitple, op2 = 00xx0xx
-        return Inst_t::decodeLoadStoreMultiple(inAddr, inCode);
-      }
-      else {
-        printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
-      }
+  case 1: { // op1 = 01
+    subCodop = (inCode >> 16 >> 9) & 0b11;
+    switch (subCodop) {
+    case 0b00:
+      return decodeLoadStore32_1(inAddr, inCode);
+      break;
+    case 0b01:
+      printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+      break;
+    case 0b10:
+      printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+      break;
+    case 0b11:
+      printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+      break;
     }
-    case 2: { // op1 = 10
-      uint8_t op = ((inCode >> 15) & 0b1); // op in ARM documentation
-      if (op == 1) {
-        subCodop = ((inCode >> 13) & 0b10) | ((inCode >> 12) & 0b01);
-        switch (subCodop) {
-          case 3:
-            return new BL_t(inAddr, inCode);
-            break;
-          default:
-            printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
-            break;
-        }
-      } else if (op == 0) {
-        const uint8_t partcodOp2 = ((inCode >> 26) & 0b1);
-        switch (partcodOp2) {
-          case 0:
-            return Inst_t::decodeDataProcessing(inAddr, inCode);
-            break;
-          case 1:
-            printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
-            break;
-          default:
-            printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr);
-            break;
-        }
-      } else { printf("Unsupported operation (%b @ |0x%.8x|)\n", inCode, inAddr); }
+  }
+  case 2: {                              // op1 = 10
+    uint8_t op = ((inCode >> 15) & 0b1); // op in ARM documentation
+    if (op == 1) {
+      subCodop = ((inCode >> 13) & 0b10) | ((inCode >> 12) & 0b01);
+      switch (subCodop) {
+      case 3:
+        return new BL_t(inAddr, inCode);
+        break;
+      default:
+        printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+        break;
+      }
+    } else if (op == 0) {
+      const uint8_t partcodOp2 = ((inCode >> 26) & 0b1);
+      switch (partcodOp2) {
+      case 0:
+        return Inst_t::decodeDataProcessing(inAddr, inCode);
+        break;
+      case 1:
+        printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+        break;
+      default:
+        printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+        break;
+      }
+    } else {
+      printf("Unsupported operation (%x @ |0x%.8x|)\n", inCode, inAddr);
+    }
   }
   case 3: {
     const uint32_t codOp2 = ((inCode >> 20) & 0b1111111);
-    if ((!(codOp2 >> 6)) && (codOp2 >> 4 & 0b11) && !(codOp2 & 0b1)) { //codeOp2 = 0110xxx
+    if ((!(codOp2 >> 6)) && (codOp2 >> 4 & 0b11) &&
+        !(codOp2 & 0b1)) { // codeOp2 = 0110xxx
       const uint32_t subCodOp1 = ((inCode >> 20) & 0b111);
       const uint32_t subCodOp2 = ((inCode >> 4) & 0b11);
       const uint32_t subCodOpRa = ((inCode >> 12) & 0b1111);
-      if (subCodOp1 == 0b000 && subCodOp2 == 0b00 && subCodOpRa == 0b1111) { //mul
+      if (subCodOp1 == 0b000 && subCodOp2 == 0b00 &&
+          subCodOpRa == 0b1111) { // mul
         return new MUL_t(inAddr, inCode);
       }
-    } else if ((!(codOp2 >> 6)) && (codOp2 >> 3 & 0b111)) { //codeOp2 = 0111xxx
+    } else if ((!(codOp2 >> 6)) && (codOp2 >> 3 & 0b111)) { // codeOp2 = 0111xxx
       const uint32_t subCodOp1 = ((inCode >> 20) & 0b111);
       const uint32_t subCodOp2 = ((inCode >> 4) & 0b1111);
-      if(subCodOp1 == 0b001 && subCodOp2 == 0b1111) { //sdiv
+      if (subCodOp1 == 0b001 && subCodOp2 == 0b1111) { // sdiv
         return new SDIV_t(inAddr, inCode);
       }
-      }
-      else {
-        printf("Unsupported operation: %b @ |0x%.8x| (2)\n", inCode, inAddr);
-      }
+    } else {
+      printf("Unsupported operation: %x @ |0x%.8x| (2)\n", inCode, inAddr);
+    }
     break;
   }
   default:
-    printf("Unsupported operation: %b @ |0x%.8x|\n", inCode, inAddr);
+    printf("Unsupported operation: %x @ |0x%.8x|\n", inCode, inAddr);
   }
   return NULL;
 }
 
 void generatePlace(FILE *prog, Inst_t *inst, uint32_t depth) {
-  fprintf(prog, "<place id=\"%d\" identifier=\"INST%x\" label=\"INST%x\" initialMarking=\"0\" eft=\"0\" lft=\"0\">\n",
+  fprintf(prog,
+          "<place id=\"%d\" identifier=\"INST%x\" label=\"INST%x\" "
+          "initialMarking=\"0\" eft=\"0\" lft=\"0\">\n",
           inst->placeId(), inst->address(), inst->address());
   fprintf(prog, "    <graphics color=\"0\">\n");
-  fprintf(prog, "        <position x=\"%.1f\" y=\"%.1f\"/>\n", depth * 200 + 151.0, 90 * inst->placeId() + 61.0);
+  fprintf(prog, "        <position x=\"%.1f\" y=\"%.1f\"/>\n",
+          depth * 200 + 151.0, 90 * inst->placeId() + 61.0);
   fprintf(prog, "        <deltaLabel deltax=\"50\" deltay=\"-5\"/>\n");
-  fprintf(prog, "    </graphics>\n    <scheduling gamma=\"0\" omega=\"0\"/>\n</place>\n");
+  fprintf(prog, "    </graphics>\n    <scheduling gamma=\"0\" "
+                "omega=\"0\"/>\n</place>\n");
 }
 
-void lowGenerateTransition(FILE *prog, Inst_t *inst, uint32_t depth, const bool condBr = false, const bool taken = false) {
+void lowGenerateTransition(FILE *prog, Inst_t *inst, uint32_t depth,
+                           const bool condBr = false,
+                           const bool taken = false) {
   float offsetX = 0.0;
   float offsetY = 0.0;
   uint32_t transitionId = inst->transitionId();
@@ -1421,21 +1879,24 @@ void lowGenerateTransition(FILE *prog, Inst_t *inst, uint32_t depth, const bool 
   }
 
   fprintf(prog,
-          "<transition id=\"%d\" identifier=\"I%x%s\" label=\"I%x%s\" eft=\"0\" lft=\"0\" speed=\"1\" cost=\"0\" unctrl=\"0\" "
+          "<transition id=\"%d\" identifier=\"I%x%s\" label=\"I%x%s\" "
+          "eft=\"0\" lft=\"0\" speed=\"1\" cost=\"0\" unctrl=\"0\" "
           "obs=\"1\"",
           transitionId, inst->address(), suffix, inst->address(), suffix);
   if (condBr) {
     if (taken) {
       fprintf(prog, " guard=\"%s && (doFetch[$any] == 1)\">\n", inst->guard());
     } else {
-      fprintf(prog, " guard=\"!(%s) && (doFetch[$any] == 1)\">\n", inst->guard());
+      fprintf(prog, " guard=\"!(%s) && (doFetch[$any] == 1)\">\n",
+              inst->guard());
     }
   } else {
     //    fprintf(prog, " guard=\"\">\n");
     fprintf(prog, " guard=\"doFetch[$any] #eqeq 1\">\n");
   }
   fprintf(prog, "    <graphics color=\"0\">\n");
-  fprintf(prog, "        <position x=\"%.1f\" y=\"%.1f\"/>\n", depth * 200 + 151.0 + offsetX * 100,
+  fprintf(prog, "        <position x=\"%.1f\" y=\"%.1f\"/>\n",
+          depth * 200 + 151.0 + offsetX * 100,
           90 * inst->placeId() + 106.0 + offsetY * 45);
   fprintf(prog, "        <deltaLabel deltax=\"25\" deltay=\"0\"/>\n");
   fprintf(prog, "        <deltaGuard deltax=\"20\" deltay=\"-20\"/>\n");
@@ -1443,7 +1904,10 @@ void lowGenerateTransition(FILE *prog, Inst_t *inst, uint32_t depth, const bool 
   fprintf(prog, "        <deltaSpeed deltax=\"-20\" deltay=\"5\"/>\n");
   fprintf(prog, "        <deltaCost deltax=\"-20\" deltay=\"5\"/>\n");
   fprintf(prog, "    </graphics>\n");
-  fprintf(prog, "    <update><![CDATA[isHit[$any] = inst%x(st[$any],mem[$any]);\ndoFetch[$any] = 0;\nac[$any] = %d;]]></update>\n",
+  fprintf(prog,
+          "    <update><![CDATA[isHit[$any] = "
+          "inst%x(st[$any],mem[$any]);\ndoFetch[$any] = 0;\nac[$any] = "
+          "%d;]]></update>\n",
           inst->address(), inst->memAccessCount());
   fprintf(prog, "</transition>\n");
 }
@@ -1465,7 +1929,8 @@ bool isStopAddress(const uint32_t stop, vector<uint32_t> &stopAddresses) {
   return false;
 }
 
-void generatePlaces(FILE *prog, vector<Inst_t *> &program, vector<Word_t *> &words, const uint32_t startAddress,
+void generatePlaces(FILE *prog, vector<Inst_t *> &program,
+                    vector<Word_t *> &words, const uint32_t startAddress,
                     vector<uint32_t> &stopAddresses, uint32_t depth = 0) {
   for (auto i = program.begin(); i != program.end(); ++i) {
     if ((*i)->address() >= startAddress) {
@@ -1474,11 +1939,13 @@ void generatePlaces(FILE *prog, vector<Inst_t *> &program, vector<Word_t *> &wor
       if ((*i)->isFuncCall()) {
         bool found = false;
         for (auto j = program.begin(); j != program.end(); ++j) {
-          //          printf("Comparing target %x with instruction %x ... ", (*i)->branchAddress(), (*j)->address());
+          //          printf("Comparing target %x with instruction %x ... ",
+          //          (*i)->branchAddress(), (*j)->address());
           if ((*i)->branchAddress() == (*j)->address()) {
             found = true;
             //            printf("found\n");
-            generatePlaces(prog, program, words, (*i)->branchAddress(), stopAddresses, depth + 1);
+            generatePlaces(prog, program, words, (*i)->branchAddress(),
+                           stopAddresses, depth + 1);
           }
         }
         if (!found) {
@@ -1493,26 +1960,29 @@ void generatePlaces(FILE *prog, vector<Inst_t *> &program, vector<Word_t *> &wor
 }
 
 void genUpArc(FILE *prog, uint32_t place, uint32_t transition) {
-  fprintf(
-    prog,
-    "    <arc place=\"%d\" transition=\"%d\" type=\"PlaceTransition\" weight=\"1\" tokenColor=\"-1\"  inhibitingCondition=\"\">\n",
-    place, transition);
+  fprintf(prog,
+          "    <arc place=\"%d\" transition=\"%d\" type=\"PlaceTransition\" "
+          "weight=\"1\" tokenColor=\"-1\"  inhibitingCondition=\"\">\n",
+          place, transition);
   fprintf(prog, "        <nail xnail=\"0\" ynail=\"0\"/>\n");
   fprintf(prog, "        <graphics  color=\"0\"></graphics>\n");
   fprintf(prog, "   </arc>\n");
 }
 
-void genDownArc(FILE *prog, uint32_t place, uint32_t transition, float Xnail = 0.0, float Ynail = 0.0) {
-  fprintf(
-    prog,
-    "    <arc place=\"%d\" transition=\"%d\" type=\"TransitionPlace\" weight=\"1\" tokenColor=\"-1\"  inhibitingCondition=\"\">\n",
-    place, transition);
-  fprintf(prog, "        <nail xnail=\"%.1f\" ynail=\"%.1f\"/>\n", Xnail, Ynail);
+void genDownArc(FILE *prog, uint32_t place, uint32_t transition,
+                float Xnail = 0.0, float Ynail = 0.0) {
+  fprintf(prog,
+          "    <arc place=\"%d\" transition=\"%d\" type=\"TransitionPlace\" "
+          "weight=\"1\" tokenColor=\"-1\"  inhibitingCondition=\"\">\n",
+          place, transition);
+  fprintf(prog, "        <nail xnail=\"%.1f\" ynail=\"%.1f\"/>\n", Xnail,
+          Ynail);
   fprintf(prog, "        <graphics  color=\"0\"></graphics>\n");
   fprintf(prog, "   </arc>\n");
 }
 
-void generateArcs(FILE *prog, vector<Inst_t *> &program, vector<Word_t *> &words, const uint32_t startAddress) {
+void generateArcs(FILE *prog, vector<Inst_t *> &program,
+                  vector<Word_t *> &words, const uint32_t startAddress) {
   for (auto i = program.begin(); i != program.end(); ++i) {
     // arc from place to transition
     genUpArc(prog, (*i)->placeId(), (*i)->transitionId());
@@ -1521,18 +1991,22 @@ void generateArcs(FILE *prog, vector<Inst_t *> &program, vector<Word_t *> &words
       genDownArc(prog, (*(i + 1))->placeId(), (*i)->transitionId());
       genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionIdTaken());
     } else if ((*i)->isUncondBranch()) {
-      genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionId(), 500.0, 90 * (*i)->placeId() + 536.0);
+      genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionId(), 500.0,
+                 90 * (*i)->placeId() + 536.0);
     } else if ((*i)->isFuncCall()) {
-      genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionId(), 500.0, 90 * (*i)->placeId() + 536.0);
+      genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionId(), 500.0,
+                 90 * (*i)->placeId() + 536.0);
     } else if ((*i)->isFuncReturn()) {
-      genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionId(), 100.0, 90 * (*i)->placeId() - 536.0);
+      genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionId(), 100.0,
+                 90 * (*i)->placeId() - 536.0);
     } else {
       genDownArc(prog, (*(i + 1))->placeId(), (*i)->transitionId());
     }
   }
 }
 
-void generatePN(vector<Inst_t *> &program, vector<Word_t *> &words, vector<uint32_t> &stopAddresses) {
+void generatePN(vector<Inst_t *> &program, vector<Word_t *> &words,
+                vector<uint32_t> &stopAddresses) {
   FILE *prog = fopen("program.xml", "w");
   filesystem::path dir = filesystem::current_path();
   // printf("%s\n", dir.c_str());
@@ -1545,7 +2019,8 @@ void generatePN(vector<Inst_t *> &program, vector<Word_t *> &words, vector<uint3
 
   fprintf(prog, "<timedCost>-1</timedCost>\n");
   fprintf(prog, "<nbTokenColor>2</nbTokenColor>\n");
-  fprintf(prog, "<declaration><![CDATA[// insert here the state variables declarations\n");
+  fprintf(prog, "<declaration><![CDATA[// insert here the state variables "
+                "declarations\n");
   fprintf(prog, "// and possibly some code to initialize them\n");
   fprintf(prog, "// using C-like syntax\n\n");
   fprintf(prog, "// insert here your type definitions using C-like syntax\n\n");
@@ -1557,9 +2032,12 @@ void generatePN(vector<Inst_t *> &program, vector<Word_t *> &words, vector<uint3
   fprintf(prog, "</project>\n\n");
 
   fprintf(prog, "<preferences>\n");
-  fprintf(prog, "    <colorPlace c0=\"SkyBlue2\" c1=\"gray\" c2=\"cyan\" c3=\"green\" c4=\"yellow\" c5=\"brown\"/>\n");
-  fprintf(prog, "    <colorTransition c0=\"yellow\" c1=\"gray\" c2=\"cyan\" c3=\"green\" c4=\"SkyBlue2\" c5=\"brown\"/>\n");
-  fprintf(prog, "    <colorArc c0=\"black\" c1=\"gray\" c2=\"blue\" c3=\"#beb760\" c4=\"#be5c7e\" c5=\"#46be90\"/>\n");
+  fprintf(prog, "    <colorPlace c0=\"SkyBlue2\" c1=\"gray\" c2=\"cyan\" "
+                "c3=\"green\" c4=\"yellow\" c5=\"brown\"/>\n");
+  fprintf(prog, "    <colorTransition c0=\"yellow\" c1=\"gray\" c2=\"cyan\" "
+                "c3=\"green\" c4=\"SkyBlue2\" c5=\"brown\"/>\n");
+  fprintf(prog, "    <colorArc c0=\"black\" c1=\"gray\" c2=\"blue\" "
+                "c3=\"#beb760\" c4=\"#be5c7e\" c5=\"#46be90\"/>\n");
   fprintf(prog, "</preferences>\n");
   fprintf(prog, "</TPN>\n");
 
@@ -1580,17 +2058,21 @@ uint32_t idFromAddress(vector<Inst_t *> &program, uint32_t inAddr) {
   return 0;
 }
 
-void computeTargetId(vector<Inst_t *> &program, vector<uint32_t> &stopAddresses, uint32_t startAddress, uint32_t returnId = -1) {
+void computeTargetId(vector<Inst_t *> &program, vector<uint32_t> &stopAddresses,
+                     uint32_t startAddress, uint32_t returnId = -1) {
   for (auto i = program.begin(); i != program.end(); ++i) {
     if ((*i)->address() >= startAddress && (*i)->targetIdTaken() == 0) {
       (*i)->setReachable(true);
       if ((*i)->isFuncCall()) {
         (*i)->setTargetIdTaken(idFromAddress(program, (*i)->branchAddress()));
         Inst_t *nextInst = *(i + 1);
-        computeTargetId(program, stopAddresses, (*i)->branchAddress(), nextInst->placeId());
+        computeTargetId(program, stopAddresses, (*i)->branchAddress(),
+                        nextInst->placeId());
       } else if ((*i)->isUncondBranch()) {
         // (*i)->Print();
-        // printf(" Branche addr: %x / Id from addr : %d", (*i)->branchAddress(), idFromAddress(program, (*i)->branchAddress()));
+        // printf(" Branche addr: %x / Id from addr : %d",
+        // (*i)->branchAddress(), idFromAddress(program,
+        // (*i)->branchAddress()));
         (*i)->setTargetIdTaken(idFromAddress(program, (*i)->branchAddress()));
         // printf(" *** %d\n", (*i)->targetIdTaken());
       } else if ((*i)->isCondBranch()) {

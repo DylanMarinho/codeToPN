@@ -64,11 +64,11 @@ initially {
   state_t st;
   mem_t[1] mem;
   // = 1 if a cache access is a hit
-  int[1] isHit = { 0 };
+  int[1] isHit = {0};
   // access count of an instruction
-  int[1] ac = { 0 };
+  int[1] ac = {0};
   //
-  uint8_t[2] doFetch = { 0, 0 };
+  uint8_t[2] doFetch = {0, 0};
   //
   uint8_t lockBus = 0;
   uint8_t accessCount = 0;
@@ -97,17 +97,33 @@ void initCache(cache_t &cache) {
   }
 }
 
-void updateSR(registers_t &regs, int val) {
+void updateSR(registers_t &regs, uint64_t val, uint32_t op1, uint32_t op2) {
   if (val == 0) {
     regs.sr = regs.sr | (1 << Zpos);
   } else {
     regs.sr = regs.sr & ~(1 << Zpos);
   }
-  if (val < 0) {
+  if ((val >> 31) & 1 == 1) {
     regs.sr = regs.sr | (1 << Npos);
   } else {
     regs.sr = regs.sr & ~(1 << Npos);
   }
+  if ((val >> 32) & 1 == 1) {
+    regs.sr = regs.sr | (1 << Cpos);
+  } else {
+    regs.sr = regs.sr & ~(1 << Cpos);
+  }
+  /* reset V flag */
+  uint32_t status = regs.sr & ~(1 << Vpos);
+  if ((op1 >> 31) & 1 == (op2 >> 31) & 1) {
+    /* signs of operands are the same */
+    if ((op1 >> 31) & 1 != (val >> 31) & 1) {
+      /* but signs of result differs, it is an overflow */
+      status = status | (1 << Vpos);
+    }
+  }
+  regs.sr = status;
+}
 }
 
 /* Does an access to a cache and return 0 if hit and 1 if miss */
@@ -124,5 +140,9 @@ int cacheAccess(cache_t &cache, int addr) {
   return result;
 }
 
-int memRead(mem_t &mem, uint32_t address) { return mem.a[(address - dataStart) / 4]; }
-int memWrite(mem_t &mem, uint32_t address, int data) { mem.a[(address - dataStart) / 4] = data; }
+int memRead(mem_t &mem, uint32_t address) {
+  return mem.a[(address - dataStart) / 4];
+}
+int memWrite(mem_t &mem, uint32_t address, int data) {
+  mem.a[(address - dataStart) / 4] = data;
+}
