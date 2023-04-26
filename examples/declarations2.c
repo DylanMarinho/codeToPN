@@ -124,7 +124,6 @@ void updateSR(registers_t &regs, uint64_t val, uint32_t op1, uint32_t op2) {
   }
   regs.sr = status;
 }
-}
 
 /* Does an access to a cache and return 0 if hit and 1 if miss */
 int cacheAccess(cache_t &cache, int addr) {
