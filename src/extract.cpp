@@ -1003,10 +1003,10 @@ Inst_t *Inst_t::decodeThumb4(const uint32_t inAddr, const uint16_t inCode) {
   uint16_t codop = (inCode >> 11) & 0b11;
   switch (codop) {
   case 0b00:
-    //    return new STOREHALFWORDimm_t(inAddr, inCode);
+    return new STOREHALFWORDimm_t(inAddr, inCode);
     break;
   case 0b01:
-    //    return new LOADHALFWORDimm_t(inAddr, inCode);
+    return new LOADHALFWORDimm_t(inAddr, inCode);
     break;
   case 0b10:
   case 0b11:
