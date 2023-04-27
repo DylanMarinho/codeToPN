@@ -793,8 +793,8 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
       return new POPLIST_t(inAddr, inCode);
       break;
     case 0b1111:
-      switch (inCode & 0b11111111) {
-      case 0b00000000:
+      switch ((inCode >> 4) & 0b1111) {
+      case 0b0000:
         return new NOP_t(inAddr, inCode);
         break;
       default:
@@ -2000,7 +2000,9 @@ void generateArcs(FILE *prog, vector<Inst_t *> &program,
       genDownArc(prog, (*i)->targetIdTaken(), (*i)->transitionId(), 100.0,
                  90 * (*i)->placeId() - 536.0);
     } else {
-      genDownArc(prog, (*(i + 1))->placeId(), (*i)->transitionId());
+      if (*(i + 1) != NULL) {
+        genDownArc(prog, (*(i + 1))->placeId(), (*i)->transitionId());
+      }
     }
   }
 }
