@@ -891,12 +891,12 @@ public:
     printf(" + %d;\n", imm5);
     printf("  uint32_t op = (");
     pReg(sReg);
-    printf(" & 0xFF) << %d;\n", offset);
-    uint32_t mask = 0xFF << offset;
+    printf(" & 255) << %d;\n", offset); //0xFF
+    uint32_t mask = 255 << offset; //0xFF
     uint32_t notmask = ~mask;
-    printf("  uint32_t previous = memRead(addr & 0xFFFFFFC);\n");
-    printf("  uint32_t new = (previous & 0x%X) | op;\n", notmask);
-    printf("  memWrite(mem, addr & 0xFFFFFFC, new);\n");
+    printf("  uint32_t previous = memRead(mem, addr & 268435452);\n"); //0xFFFFFFC
+    printf("  uint32_t new = (previous & %u) | op;\n", notmask);
+    printf("  memWrite(mem, addr & 268435452, new);\n"); //0xFFFFFFC
   }
 };
 
@@ -918,7 +918,7 @@ public:
     printf("  uint32_t addr = ");
     pReg(iReg);
     printf(" + %d;\n", imm5);
-    printf("  uint32_t data = (memRead(addr & 0xFFFFFFC) >> %d) & 0xFF;\n",
+    printf("  uint32_t data = (memRead(mem, addr & 268435452) >> %d) & 255;\n", //0xFFFFFFC / 0xFF
            offset);
     wReg(dReg);
     printf(" data;\n");
