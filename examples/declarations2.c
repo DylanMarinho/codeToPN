@@ -7,6 +7,8 @@ const int Vpos = 3;
 // const int Nmask = 1;
 const int Zmask = 1 << Zpos;
 const int Nmask = 1 << Npos;
+const int Cmask = 1 << Cpos;
+const int Vmask = 1 << Vpos;
 
 const int r0 = 1;
 const int r1 = 1 << 1;
