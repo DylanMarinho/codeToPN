@@ -272,7 +272,7 @@ public:
   }
   virtual void Print() { printf("%x: movs r%d, #%d", addr, dReg, imm8); }
   virtual void romeoFuncContent() {
-    printf("  op = %d;\n", imm8);
+    printf("  uint32_t op = %d;\n", imm8);
     wReg(dReg);
     printf("op;\n");
     updateSR(pRegS(dReg), "op", "op");
