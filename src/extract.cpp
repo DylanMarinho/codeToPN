@@ -376,7 +376,11 @@ public:
     immByPC = 0;
   }
   virtual bool isLDRPC() { return true; }
-  virtual uint32_t targetWord() { return addr + 2 + imm8 * 4; }
+  virtual uint32_t targetWord() {
+    const uint32_t pc = addr + 2;
+    const uint32_t pcAl = pc % 4 == 0 ? pc : (pc / 4 + 1) * 4;
+    return pcAl + imm8 * 4;
+  }
   virtual void Print() {
     printf("%x: ldr r%d, [pc, #%d]", addr, dReg, imm8 << 2);
   }
@@ -891,12 +895,13 @@ public:
     printf(" + %d;\n", imm5);
     printf("  uint32_t op = (");
     pReg(sReg);
-    printf(" & 255) << %d;\n", offset); //0xFF
-    uint32_t mask = 255 << offset; //0xFF
+    printf(" & 255) << %d;\n", offset); // 0xFF
+    uint32_t mask = 255 << offset;      // 0xFF
     uint32_t notmask = ~mask;
-    printf("  uint32_t previous = memRead(mem, addr & 268435452);\n"); //0xFFFFFFC
+    printf(
+        "  uint32_t previous = memRead(mem, addr & 268435452);\n"); // 0xFFFFFFC
     printf("  uint32_t new = (previous & %u) | op;\n", notmask);
-    printf("  memWrite(mem, addr & 268435452, new);\n"); //0xFFFFFFC
+    printf("  memWrite(mem, addr & 268435452, new);\n"); // 0xFFFFFFC
   }
 };
 
@@ -918,8 +923,9 @@ public:
     printf("  uint32_t addr = ");
     pReg(iReg);
     printf(" + %d;\n", imm5);
-    printf("  uint32_t data = (memRead(mem, addr & 268435452) >> %d) & 255;\n", //0xFFFFFFC / 0xFF
-           offset);
+    printf(
+        "  uint32_t data = (memRead(mem, addr & 268435452) >> %d) & 255;\n", // 0xFFFFFFC / 0xFF
+        offset);
     wReg(dReg);
     printf(" data;\n");
   }
