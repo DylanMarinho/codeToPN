@@ -80,16 +80,17 @@ initially {
   initCache(st[0].ICache);
   // initCache(st[1].ICache);
 
-  st[0].regs.r[13] = dataStart + 100;
-  // st[1].regs.r[13] = dataStart + 560;
-
   int i;
-  for (i = 0; i < 13; i++) {
+  for (i = 0; i < 16; i++) {
     st[0].regs.r[i] = i;
     //    st[1].regs.r[i] = 20 + i;
   }
   st[0].regs.sr = 0;
   //  st[1].regs.sr = 0;
+  
+  st[0].regs.r[13] = dataStart + 100;
+  // st[1].regs.r[13] = dataStart + 560;
+
 }
 
 void initCache(cache_t &cache) {
