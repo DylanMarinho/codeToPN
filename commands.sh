@@ -5,6 +5,9 @@ else
 
   arm-none-eabi-objdump -d tmp/$1 | awk -f src/extract.awk > tmp/$1.bin
 
+  arm-none-eabi-objdump -s -j .rodata tmp/$1 > tmp/$1.rowdata
+  src/extract_variables tmp/$1.rowdata
+
   cat tmp/$1.bin | src/extract $2  > tmp/instructions_$1.c
   mv program.xml tmp/program_$1.xml
 fi
