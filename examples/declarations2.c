@@ -91,6 +91,8 @@ initially {
   st[0].regs.r[13] = dataStart + 100;
   // st[1].regs.r[13] = dataStart + 560;
 
+  initConsts(mem);
+
 }
 
 void initCache(cache_t &cache) {
@@ -148,3 +150,5 @@ int memRead(mem_t &mem, uint32_t address) {
 int memWrite(mem_t &mem, uint32_t address, int data) {
   mem.a[(address - dataStart) / 4] = data;
 }
+
+void initConsts(mem_t &mem) {}

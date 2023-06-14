@@ -1,5 +1,7 @@
 import argparse
+import os.path
 import re
+
 
 def transform_number(entry):
     """
@@ -43,7 +45,7 @@ def parsed_line_to_entries(parsed_line):
     addr = parsed_line[0]
     values = parsed_line[1::]
     for i in range(len(values)):
-        ret_table.append([addr + i*4, int(values[i],0)])  # 4 = sizeof(int)
+        ret_table.append([addr + i * 4, int(values[i], 0)])  # 4 = sizeof(int)
     return ret_table
 
 
@@ -73,6 +75,46 @@ def parse_rodata(file_content):
     return ret_table
 
 
+def write_in_file(ufile, memory_entries, output_name):
+    """
+    Update the declaration file with the content of the memory
+    :param file: input declaration file
+    :param memory_entries: table of memory entries
+    :param output_name: Name of the output file
+    :return: None (write a file, tmp/[declaration file]_[model].c)
+    """
+    try:
+        input = open(ufile, "r")
+        content = input.readlines()
+        new_content = []
+
+        for line in content:
+            # Update datastart
+            if "const int dataStart" in line:
+                datastart = memory_entries[0][0]
+                new_content.append("const int dataStart = {};\n".format(datastart))
+            elif "void initConsts" in line:
+                # Write function update memory
+                new_content.append("void initConsts(mem_t &mem) {\n")
+                for k in memory_entries:
+                    new_content.append("\tmemWrite(mem, {},{});\n".format(k[0], k[1]))
+                new_content.append("}\n")
+            else:
+                new_content.append(line)
+
+        # Write file
+        output_path = os.path.join("tmp", output_name)
+        output = open(output_path, "w")
+        output.writelines(new_content)
+
+    except FileNotFoundError:
+        print("File {} not found".format(ufile))
+
+
+def get_filename(file):
+    return os.path.basename(os.path.splitext(file)[0])
+
+
 if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(
@@ -82,6 +124,12 @@ if __name__ == "__main__":
                         help='path to the rodata file')
     parser.add_argument('--output',
                         help='output filename (default: [input filename].var)')
+    parser.add_argument('-u',
+                        default=False, action='store_true',
+                        help='Update declaration file with data')
+    parser.add_argument('-ufile',
+                        default="examples/declarations2.c",
+                        help="if -u is set, set the input declaration file (default: examples/declarations2.c)'")
     args = parser.parse_args()
 
     # Parsing function
@@ -95,3 +143,7 @@ if __name__ == "__main__":
     print("Datastart: {}".format(datastart))
     for k in memory_entries:
         print("memWrite(mem, {},{});".format(k[0], k[1]))
+
+    if args.u:
+        output_name = "{}_{}.c".format(get_filename(args.ufile), get_filename(args.file))
+        write_in_file(args.ufile, memory_entries, output_name)
