@@ -43,7 +43,7 @@ def update_xml(xml_file, files_to_input=[], slave_models_to_input=[]):
         elif "<project" in line:
             content_to_write.append(
                 '<project nbinput="{}" openinput="{}" nbinclude="{}" >\n'.format(len(slave_models_to_input), 0,
-                                                                               len(files_to_input)))
+                                                                                 len(files_to_input)))
             i = 1
             for model in slave_models_to_input:
                 content_to_write.append(
@@ -105,7 +105,8 @@ def run(file_name, file_path=""):
     output_xml_file = rowdata_file = compiled_file + ".xml"
     instructions_file = os.path.join(output_dir, "instructions_{}".format(file_name) + ".c")
     declarations_input_file = "examples/declarations2.c"
-    declarations_output_file = os.path.join(output_dir, "declarations_{}".format(file_name) + ".c")
+    declarations_output_file = os.path.join(output_dir, "{}_{}".format(
+        os.path.basename(os.path.splitext(declarations_input_file)[0]), file_name) + ".c")
 
     # compile
     os.system(
@@ -136,6 +137,7 @@ def run(file_name, file_path=""):
     files_to_input = [declarations_output_file, instructions_file]
     update_xml(output_xml_file, files_to_input, slave_models_to_input)
 
+    print("Property to get the execution times: {}".format("EF[p,p](INST{}[0]>0)".format(last_instruction)))
 
 if __name__ == "__main__":
     # Parser
