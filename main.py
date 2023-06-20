@@ -2,6 +2,7 @@ import argparse
 import os
 
 output_dir = "tmp/"
+core_model = "twoCoresModel3_empty.xml"
 
 
 def extract_adress(line):
@@ -14,6 +15,51 @@ def extract_adress(line):
     address = address.replace(" ", "")
     address = address[:-1]
     return address
+
+
+def update_xml(xml_file, files_to_input=[], slave_models_to_input=[]):
+    """
+    Update an xml file for Roméo with files
+    :param xml_file: path to the XML file
+    :param files_to_input: Files to input in the project
+    :param slave_models_to_input: Files of models to input in the project as slaves
+    :return: None
+    """
+    # Get content
+    f = open(xml_file, "r")
+    content = f.readlines()
+    f.close()
+
+    # Update content
+    content_to_write = []
+    for line in content:
+        # token in first place
+        if '<place id="1"' in line:
+            content_to_write.append(line.replace('initialMarking="0"', 'initialMarking="1"'))
+        # update nb token
+        elif "<nbTokenColor>" in line:
+            content_to_write.append("<nbTokenColor>1</nbTokenColor>\n")
+        # insert files
+        elif "<project" in line:
+            content_to_write.append(
+                '<project nbinput="{}" openinput="{}" nbinclude="{}" >\n'.format(len(slave_models_to_input), 0,
+                                                                               len(files_to_input)))
+            i = 1
+            for model in slave_models_to_input:
+                content_to_write.append(
+                    '\t<input id="{}"  file="{}"  status="closed"/>\n'.format(i, os.path.basename(model)))
+                i += 1
+            i = 1
+            for file in files_to_input:
+                content_to_write.append('\t<include id="{}" file="{}"/>\n'.format(i, os.path.basename(file)))
+                i += 1
+        else:
+            content_to_write.append(line)
+
+    # Write file
+    f = open(xml_file, "w")
+    f.writelines(content_to_write)
+    f.close()
 
 
 def get_last_instruction(compiled_file, file_name):
@@ -58,6 +104,8 @@ def run(file_name, file_path=""):
     rowdata_file = compiled_file + ".rowdata"
     output_xml_file = rowdata_file = compiled_file + ".xml"
     instructions_file = os.path.join(output_dir, "instructions_{}".format(file_name) + ".c")
+    declarations_input_file = "examples/declarations2.c"
+    declarations_output_file = os.path.join(output_dir, "declarations_{}".format(file_name) + ".c")
 
     # compile
     os.system(
@@ -73,13 +121,20 @@ def run(file_name, file_path=""):
 
     # extract rowdata
     os.system("arm-none-eabi-objdump -s -j .rodata {} > {}".format(compiled_file, rowdata_file))
-    os.system("python3 src/extract_variables.py {} -u".format(rowdata_file))
+    os.system(
+        "python3 src/extract_variables.py {} --output {} -u -ufile {}".format(rowdata_file, declarations_output_file,
+                                                                              declarations_input_file))
 
     # Extract instructions
     os.system("cat {} | src/extract {} > {}".format(bin_file, last_instruction, instructions_file))
 
     # Rename output
     os.system("mv {} {}".format("program.xml", output_xml_file))
+
+    # update output
+    slave_models_to_input = [core_model]
+    files_to_input = [declarations_output_file, instructions_file]
+    update_xml(output_xml_file, files_to_input, slave_models_to_input)
 
 
 if __name__ == "__main__":
