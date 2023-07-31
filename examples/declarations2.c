@@ -144,11 +144,44 @@ int cacheAccess(cache_t &cache, int addr) {
   return result;
 }
 
-int memRead(mem_t &mem, uint32_t address) {
+uint32_t memRead(mem_t &mem, uint32_t address) {
   return mem.a[(address - dataStart) / 4];
 }
-int memWrite(mem_t &mem, uint32_t address, int data) {
+
+void memWrite(mem_t &mem, uint32_t address, uint32_t data) {
   mem.a[(address - dataStart) / 4] = data;
+}
+
+uint16_t memRead16(mem_t &mem, uint32_t address) {
+  int data = memRead(mem, address);
+  int offset = (address & 1) * 16;
+  data = (data >> offset) & 0x0000FFFF;
+  return data;
+}
+
+uint8_t memRead8(mem_t &mem, uint32_t address) {
+  int data = memRead(mem, address);
+  int offset = (address & 3) * 8;
+  data = (data >> offset) & 0x000000FF;
+  return data;
+}
+
+void memWrite16(mem_t &mem, uint32_t address, uint16_t word) {
+  uint32_t data = memRead(mem, address);
+  uint32_t offset = (address & 1) * 16;
+  uint32_t mask = 0xFFFF0000 >> offset;
+  uint32_t word32 = word;
+  data = (data & mask) | (word32 << offset);
+  memWrite(mem, address, data);
+}
+
+void memWrite8(mem_t &mem, uint32_t address, uint8_t byte) {
+  uint32_t data = memRead(mem, address);
+  uint32_t offset = (address & 3) * 8;
+  uint32_t mask = ~(0x000000FF << offset);
+  uint32_t word32 = byte;
+  data = (data & mask) | (word32 << offset);
+  memWrite(mem, address, data);
 }
 
 void initConsts(mem_t &mem) {}

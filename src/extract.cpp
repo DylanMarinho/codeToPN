@@ -889,19 +889,13 @@ public:
     printf("%x: str.b r%d, [r%d, #%d]", addr, sReg, iReg, imm5);
   }
   virtual void romeoFuncContent() {
-    uint32_t offset = (imm5 & 0b11) << 3;
     printf("  uint32_t addr = ");
     pReg(iReg);
     printf(" + %d;\n", imm5);
-    printf("  uint32_t op = (");
+    printf("  uint8_t op = (");
     pReg(sReg);
-    printf(" & 255) << %d;\n", offset); // 0xFF
-    uint32_t mask = 255 << offset;      // 0xFF
-    uint32_t notmask = ~mask;
-    printf(
-        "  uint32_t previous = memRead(mem, addr & 268435452);\n"); // 0xFFFFFFC
-    printf("  uint32_t new = (previous & %u) | op;\n", notmask);
-    printf("  memWrite(mem, addr & 268435452, new);\n"); // 0xFFFFFFC
+    printf(" & 255);\n");
+    printf("  memWrite8(mem, addr, op);\n");
   }
 };
 
@@ -919,13 +913,10 @@ public:
     printf("%x: ldr.b r%d, [r%d, #%d]", addr, dReg, iReg, imm5);
   }
   virtual void romeoFuncContent() {
-    uint32_t offset = (imm5 & 0b11) << 3;
     printf("  uint32_t addr = ");
     pReg(iReg);
     printf(" + %d;\n", imm5);
-    printf(
-        "  uint32_t data = (memRead(mem, addr & 268435452) >> %d) & 255;\n", // 0xFFFFFFC / 0xFF
-        offset);
+    printf("  uint32_t data = memRead8(mem, addr);\n");
     wReg(dReg);
     printf(" data;\n");
   }
@@ -972,11 +963,13 @@ public:
   virtual uint8_t memAccessCount() { return 1; }
 
   virtual void romeoFuncContent() {
-    printf("  memWrite(mem, ");
+    printf("  uint32_t address = ");
     pReg(iReg);
-    printf(" + %d, ", imm5 << 2);
+    printf(" + %d;\n", imm5 << 1);
+    printf("  uint16_t data = ");
     pReg(sReg);
-    printf(");\n");
+    printf(" & 0x0000FFFF;\n");
+    printf("  memWrite16(mem, address, data);\n");
   }
 };
 
@@ -999,7 +992,7 @@ public:
 
   virtual void romeoFuncContent() {
     wReg(dReg);
-    printf("memRead(mem, ");
+    printf("memRead16(mem, ");
     pReg(iReg);
     printf(" + %d);\n", imm5 << 2);
   }
@@ -1164,7 +1157,7 @@ class STMIA_t : public Inst_t {
 public:
   STMIA_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
     iReg = (inCode >> 8) & 0b111;
-    sRegList = (inCode & 0b11111111) | ((inCode & 0b100000000) << 6);
+    sRegList = (inCode & 0b11111111);
   }
   virtual void Print() {
     printf("%x: stmia r%d!, {", addr, iReg);
