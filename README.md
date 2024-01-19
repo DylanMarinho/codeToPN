@@ -11,3 +11,6 @@ This function will automatically compile the c file, extract the memory and inst
 
 ## To use Roméo
 When Roméo is open, open [name of the c file].xml and check the printed property (`EF[p,p](INST...[0]>0)`)
+
+## Author
+Developed by Dylan Marinho
