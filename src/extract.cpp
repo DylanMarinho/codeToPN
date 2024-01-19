@@ -1468,7 +1468,7 @@ public:
     pReg(nReg);
     printf(";\n  uint64_t op2 = ");
     pReg(mReg);
-    printf("  uint64_t val = op1 * op2;\n");
+    printf(";\n uint64_t val = op1 * op2;\n");
     wReg(dReg);
     printf("val;\n");
     updateSR("val", "op1", "op2"); // not sure for V
@@ -1494,7 +1494,7 @@ public:
     pReg(nReg);
     printf(";\n  uint64_t op2 = ");
     pReg(mReg);
-    printf("  uint64_t val = op1 / op2;\n");
+    printf(";\n  uint64_t val = op1 / op2;\n");
     wReg(dReg);
     printf("val;\n");
     updateSR("val", "op1", "op2"); // not sure for V
