@@ -80,6 +80,7 @@ initially {
   initCache(st[0].ICache);
   // initCache(st[1].ICache);
 
+  // initialise registers arbitrarily
   int i;
   for (i = 0; i < 16; i++) {
     st[0].regs.r[i] = i;
@@ -91,6 +92,11 @@ initially {
   st[0].regs.r[13] = dataStart + 100;
   // st[1].regs.r[13] = dataStart + 560;
 
+  // Initialise memory arbitrarily
+  for (int i = 0; i < 30; i++) {
+      mem[0].a[i] = i;
+  }
+  
   initConsts(mem);
 
 }

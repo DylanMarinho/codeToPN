@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<romeo version="Romeo v3.8.6"> </romeo>
-<TPN name="/home/dylan/Documents/git/examples/twoCoresModel3_empty.xml">
+<romeo version="Romeo v3.9.4"> </romeo>
+<TPN name="/home/did/recherche/tools/codeToPN/tmp/twoCoresModel3_empty.xml">
   <place id="1" identifier="P1" label="P1" initialMarking="0" eft="0" lft="inf"> 
       <graphics color="0"> 
          <position x="961.0" y="121.0"/> 
@@ -352,7 +352,9 @@ accessCount = ac[$any];]]></update>
 
 ]]></declaration>
 
-  <project nbinput="0" openinput="0" nbinclude="0" >
+  <project nbinput="0" openinput="0" nbinclude="2" >
+     <include id="1" file="declarations2_check_string_2.c"/> 
+     <include id="2" file="instructions_check_string_2.c"/> 
  </project>
 
   <preferences> 
