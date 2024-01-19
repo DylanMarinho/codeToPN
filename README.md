@@ -36,7 +36,9 @@ This function will automatically compile the C file, extract the memory and inst
 It ends with the print of the function to compute the execution times of the model.
 
 ## To use Roméo
-When Roméo is open, open `[name of the C file].xml` and check the printed property (`EF[p,p](INST...[0]>0)`)
+When Roméo is open, open `[name of the C file].xml`, and check the property that was printed in the terminal output (resembling `EF[p,p](INST...[0]>0)`)
+
+NB: currently, the generated model might be in `tmp` and you might have to copy `examples/twoCoresModel3_empty.xml` to `tmp/` before executing Roméo.
 
 ## Author
 Developed by Dylan Marinho
