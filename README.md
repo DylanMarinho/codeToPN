@@ -1,16 +1,35 @@
-# C Code to Petri-Nets
+# C code to (parametric) timed Petri nets
+
+This tool converts automatically C programs into timed Petri nets readable by the [Roméo model checker](https://romeo.ls2n.fr/).
 
 ## Installation
-- ARM GNU toolchain https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads (in the PATH) (most probably `x86_64 Linux hosted cross toolchains` then `AArch32 bare-metal target (arm-none-eabi)`)
-- compile src/extract.cpp with `cd src ; g++ -std=c++17 extract.cpp -o extract`
+
+### Install ARM GNU toolchain
+Download the [ARM GNU toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
+
+(most probably `x86_64 Linux hosted cross toolchains` then `AArch32 bare-metal target (arm-none-eabi)`)
+
+Do not forget to add the `bin` repository to your `$PATH`.
+
+### Compile
+Compile `src/extract.cpp` with
+```
+cd src ; g++ -std=c++17 extract.cpp -o extract ; cd ..
+```
+
+You then have to create a `tmp` directory at the root of the codeToPN repository.
+```
+mkdir tmp
+```
 
 ## Usage
 `python3 main.py [path to c file]`
 
-This function will automatically compile the c file, extract the memory and instruction data, generate and update the Romeo project. It ends with the print of the function to compute the execution times of the model.
+This function will automatically compile the C file, extract the memory and instruction data, generate and update the Roméo project.
+It ends with the print of the function to compute the execution times of the model.
 
 ## To use Roméo
-When Roméo is open, open [name of the c file].xml and check the printed property (`EF[p,p](INST...[0]>0)`)
+When Roméo is open, open [name of the C file].xml and check the printed property (`EF[p,p](INST...[0]>0)`)
 
 ## Author
 Developed by Dylan Marinho
