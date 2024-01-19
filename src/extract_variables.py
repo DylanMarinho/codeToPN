@@ -2,6 +2,7 @@ import argparse
 import os.path
 import re
 
+output_dir = "generated_files/"
 
 def transform_number(entry):
     """
@@ -81,7 +82,7 @@ def write_in_file(ufile, memory_entries, output_name):
     :param file: input declaration file
     :param memory_entries: table of memory entries or None if no table of memory entries
     :param output_name: Name of the output file
-    :return: None (write a file, tmp/[declaration file]_[model].c)
+    :return: None (write a file, [output_dir]/[declaration file]_[model].c)
     """
     try:
         input = open(ufile, "r")
@@ -109,7 +110,7 @@ def write_in_file(ufile, memory_entries, output_name):
                 new_content.append(line)
 
         # Write file
-        output_path = os.path.join("tmp", output_name)
+        output_path = os.path.join(output_dir, output_name)
         output = open(output_path, "w")
         output.writelines(new_content)
 
@@ -134,8 +135,8 @@ if __name__ == "__main__":
                         default=False, action='store_true',
                         help='Update declaration file with data')
     parser.add_argument('-ufile',
-                        default="examples/declarations2.c",
-                        help="if -u is set, set the input declaration file (default: examples/declarations2.c)'")
+                        default="declarations.c",
+                        help="if -u is set, set the input declaration file (default: declarations.c)'")
     args = parser.parse_args()
 
     # Parsing function

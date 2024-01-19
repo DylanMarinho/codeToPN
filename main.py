@@ -1,8 +1,15 @@
 import argparse
 import os
 
-output_dir = "tmp/"
-core_model = "twoCoresModel3_empty.xml"
+output_dir = "generated_files/"
+
+# This line can be customized using other files
+hardware_model_root = "hardware_models/twoCoresModel3_empty/"
+# TODO (ÉA, 2024/01/19): add an option somewhere! (earlier default: twoCoresModel3_empty.xml)
+
+# Constant
+declarations_input_file_name    = hardware_model_root + "declarations.c"
+core_model_name                 = hardware_model_root + "hardware.xml"
 
 
 def extract_adress(line):
@@ -104,9 +111,8 @@ def run(file_name, file_path=""):
     rowdata_file = compiled_file + ".rowdata"
     output_xml_file = rowdata_file = compiled_file + ".xml"
     instructions_file = os.path.join(output_dir, "instructions_{}".format(file_name) + ".c")
-    declarations_input_file = "examples/declarations2.c"
     declarations_output_file = os.path.join(output_dir, "{}_{}".format(
-        os.path.basename(os.path.splitext(declarations_input_file)[0]), file_name) + ".c")
+        os.path.basename(os.path.splitext(declarations_input_file_name)[0]), file_name) + ".c")
 
     # compile
     os.system(
@@ -124,7 +130,7 @@ def run(file_name, file_path=""):
     os.system("arm-none-eabi-objdump -s -j .rodata {} > {}".format(compiled_file, rowdata_file))
     os.system(
         "python3 src/extract_variables.py {} --output {} -u -ufile {}".format(rowdata_file, declarations_output_file,
-                                                                              declarations_input_file))
+                                                                              declarations_input_file_name))
 
     # Extract instructions
     os.system("cat {} | src/extract {} > {}".format(bin_file, last_instruction, instructions_file))
@@ -133,7 +139,7 @@ def run(file_name, file_path=""):
     os.system("mv {} {}".format("program.xml", output_xml_file))
 
     # update output
-    slave_models_to_input = [core_model]
+    slave_models_to_input = [core_model_name]
     files_to_input = [declarations_output_file, instructions_file]
     update_xml(output_xml_file, files_to_input, slave_models_to_input)
 
