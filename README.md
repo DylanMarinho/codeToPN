@@ -1,7 +1,7 @@
 # C Code to Petri-Nets
 
 ## Installation
-- ARM GNU toolchain https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads (in the PATH)
+- ARM GNU toolchain https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads (in the PATH) (most probably `x86_64 Linux hosted cross toolchains` then `AArch32 bare-metal target (arm-none-eabi)`)
 - compile src/extract.cpp with `cd src ; g++ -std=c++17 extract.cpp -o extract`
 
 ## Usage
