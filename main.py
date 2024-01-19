@@ -116,7 +116,7 @@ def run(file_name, file_path=""):
 
     # compile
     os.system(
-        "arm-none-eabi-gcc {} -o {} -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib".format(
+        "arm-none-eabi-gcc -O0 {} -o {} -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib".format(
             input_file, compiled_file
         ))
 
