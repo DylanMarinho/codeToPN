@@ -175,11 +175,11 @@ void memWrite16(mem_t &mem, uint32_t address, uint16_t word) {
   memWrite(mem, address, data);
 }
 
-void memWrite8(mem_t &mem, uint32_t address, uint8_t byte) {
+void memWrite8(mem_t &mem, uint32_t address, uint8_t b) {
   uint32_t data = memRead(mem, address);
   uint32_t offset = (address & 3) * 8;
   uint32_t mask = ~(0x000000FF << offset);
-  uint32_t word32 = byte;
+  uint32_t word32 = b;
   data = (data & mask) | (word32 << offset);
   memWrite(mem, address, data);
 }
