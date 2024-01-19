@@ -79,7 +79,7 @@ def write_in_file(ufile, memory_entries, output_name):
     """
     Update the declaration file with the content of the memory
     :param file: input declaration file
-    :param memory_entries: table of memory entries
+    :param memory_entries: table of memory entries or None if no table of memory entries
     :param output_name: Name of the output file
     :return: None (write a file, tmp/[declaration file]_[model].c)
     """
@@ -91,13 +91,19 @@ def write_in_file(ufile, memory_entries, output_name):
         for line in content:
             # Update datastart
             if "const int dataStart" in line:
-                datastart = memory_entries[0][0]
+                #if memory_entries == None:
+                    #raise Exception("Impossible case: const int dataStart found, but no memory_entries found!")
+                if memory_entries != None:
+                    datastart = memory_entries[0][0]
+                else:
+                    datastart = 0
                 new_content.append("const int dataStart = {};\n".format(datastart))
             elif "void initConsts" in line:
                 # Write function update memory
                 new_content.append("void initConsts(mem_t &mem) {\n")
-                for k in memory_entries:
-                    new_content.append("\tmemWrite(mem, {},{});\n".format(k[0], k[1]))
+                if memory_entries != None:
+                    for k in memory_entries:
+                        new_content.append("\tmemWrite(mem, {},{});\n".format(k[0], k[1]))
                 new_content.append("}\n")
             else:
                 new_content.append(line)
@@ -139,11 +145,15 @@ if __name__ == "__main__":
     memory_entries = parse_rodata(content)
 
     # TODO: temp code, need to be placed somewhere in the workflow
-    datastart = memory_entries[0][0]
-    print("Datastart: {}".format(datastart))
-    for k in memory_entries:
-        print("memWrite(mem, {},{});".format(k[0], k[1]))
+    if memory_entries != []:
+        datastart = memory_entries[0][0]
+        print("Datastart: {}".format(datastart))
+        for k in memory_entries:
+            print("memWrite(mem, {},{});".format(k[0], k[1]))
 
     if args.u:
         output_name = "{}_{}.c".format(get_filename(args.ufile), get_filename(args.file))
-        write_in_file(args.ufile, memory_entries, output_name)
+        if memory_entries != []:
+            write_in_file(args.ufile, memory_entries, output_name)
+        else:
+            write_in_file(args.ufile, None, output_name)
