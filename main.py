@@ -105,6 +105,10 @@ def run(file_name, file_path=""):
     :return: PN file
     """
 
+    # make sure the output directory exists
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
     input_file = os.path.join(file_path, file_name) + ".c"
     compiled_file = os.path.join(output_dir, file_name)
     bin_file = compiled_file + ".bin"
