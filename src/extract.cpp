@@ -816,7 +816,7 @@ public:
   virtual void romeoFuncContent() {
     printf("  uint32_t op = ");
     pReg(sReg);
-    printf(";\n  op = op & 0x000000FF");
+    printf(";\n  op = op & 0x000000FF;\n");
     wReg(dReg);
     printf("op;\n");
   };
