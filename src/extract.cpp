@@ -69,7 +69,7 @@ public:
   virtual uint32_t branchAddress() { return 0; }
   virtual bool isFuncCall() { return false; }
   virtual bool isFuncReturn() { return false; }
-  virtual void romeoFuncContent(){};
+  virtual void romeoFuncContent() {};
   virtual bool isLDRPC() { return false; }
   virtual uint32_t targetWord() { return 0; }
   virtual bool isCondBranch() { return false; }
@@ -114,6 +114,8 @@ private:
                                      const uint32_t inCode);
   static Inst_t *decodeLoadStoreMultiple(const uint32_t inAddr,
                                          const uint32_t inCode);
+  static Inst_t *decodeSignExtentInst(const uint32_t inAddr,
+                                      const uint16_t inCode);
 };
 
 /*===========================================================================*/
@@ -392,6 +394,27 @@ public:
   }
 };
 
+class AND_t : public Inst_t {
+  uint8_t dReg, sReg;
+
+public:
+  AND_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+    dReg = inCode & 0b111;
+    sReg = (inCode >> 3) & 0b111;
+  }
+  virtual void Print() { printf("%x: ands r%d, r%d", addr, dReg, sReg); }
+  virtual void romeoFuncContent() {
+    printf("  uint64_t op1 = ");
+    pReg(dReg);
+    printf(";\n  uint64_t op2 = ");
+    pReg(sReg);
+    printf(";\n  uint64_t val = op1 & op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "op2");
+  };
+};
+
 class RSB_t : public Inst_t {
   uint8_t dReg, sReg;
 
@@ -544,6 +567,9 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
     } else {
       secondOpCode = (inCode >> 6) & 0b1111;
       switch (secondOpCode) {
+      case 0:
+        return new AND_t(inAddr, inCode);
+        break;
       case 9:
         return new RSB_t(inAddr, inCode);
         break;
@@ -778,6 +804,43 @@ public:
   };*/
 };
 
+class UXTB_t : public Inst_t {
+  uint8_t dReg, sReg;
+
+public:
+  UXTB_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+    dReg = inCode & 0b111;
+    sReg = (inCode >> 3) & 0b111;
+  }
+  virtual void Print() { printf("%x: uxtb r%d, r%d", addr, dReg, sReg); }
+  virtual void romeoFuncContent() {
+    printf("  uint32_t op = ");
+    pReg(sReg);
+    printf(";\n  op = op & 0x000000FF");
+    wReg(dReg);
+    printf("op;\n");
+  };
+};
+
+Inst_t *Inst_t::decodeSignExtentInst(const uint32_t inAddr,
+                                     const uint16_t inCode) {
+  const uint16_t subCodop = (inCode >> 6) & 0b11;
+  switch (subCodop) {
+  case 0b00:
+  case 0b01:
+  case 0b10:
+    printf("Unsupported sign extension instruction:  %x "
+           "@ |0x%.8x| \n",
+           inCode, inAddr);
+    return NULL;
+    break;
+  case 0b11:
+    return new UXTB_t(inAddr, inCode);
+    break;
+  }
+  return NULL;
+}
+
 Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
   if (inCode & (1 << 12)) {
     uint16_t codop = (inCode >> 8) & 0b1111;
@@ -788,6 +851,10 @@ Inst_t *Inst_t::decodeThumb5(const uint32_t inAddr, const uint16_t inCode) {
       } else {
         return new ADDSP_t(inAddr, inCode);
       }
+      break;
+    case 0b0010:
+      return decodeSignExtentInst(inAddr, inCode);
+      break;
     case 0b0100:
     case 0b0101:
       return new PUSHLIST_t(inAddr, inCode);
@@ -1456,7 +1523,7 @@ public:
   MUL_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
     nReg = ((inCode >> 16) & 0b1111);
     dReg = ((inCode >> 8) & 0b1111);
-    mReg = ((inCode)&0b1111);
+    mReg = ((inCode) & 0b1111);
   }
 
   virtual void Print() {
@@ -1482,7 +1549,7 @@ public:
   SDIV_t(const uint32_t inAddr, const uint32_t inCode) : Inst_t(inAddr) {
     nReg = ((inCode >> 16) & 0b1111);
     dReg = ((inCode >> 8) & 0b1111);
-    mReg = ((inCode)&0b1111);
+    mReg = ((inCode) & 0b1111);
   }
 
   virtual void Print() {
@@ -1513,7 +1580,7 @@ public:
     dReg = ((inCode >> 8) & 0b1111);
     i = ((inCode >> 26) & 0b1);
     imm3 = ((inCode >> 12) & 0b111);
-    imm8 = ((inCode)&0b11111111);
+    imm8 = ((inCode) & 0b11111111);
 
     imm32 = (i << 3 << 8) | (imm3 << 8) | imm8;
   }
