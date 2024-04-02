@@ -3,6 +3,7 @@
 #------------------------------------------------------------
 import argparse
 import os
+import sys
 
 #------------------------------------------------------------
 # Constants
@@ -95,12 +96,15 @@ def get_last_instruction(compiled_file, file_name):
     # objdump
     os.system("arm-none-eabi-objdump -d {} > {}".format(compiled_file, objdump_output))
 
+    # check file existence
+    if (not(os.path.isfile(objdump_output))):
+        sys.exit("File " + objdump_output + " does not exist!")
+
     # read extracted file
     f = open(objdump_output, "r")
     content = f.readlines()
     last_address = 0
     keyword_to_exclude = [".word", "nop"]
-    # TODO: check that `content` is not empty! (otherwise returns `0` instead of an exception)
     for line in content:
         last_instruction = True
         for keyword in keyword_to_exclude:
@@ -152,14 +156,14 @@ def run(file_name, file_path=""):
 
     # Extract instructions
     extract_command = "cat {} | src/extract {} > {}".format(bin_file, last_instruction, instructions_file)
-    print("Command for extraction:")
-    print(extract_command)
+    print("Command for extracting instructions:")
+    print("  " + extract_command)
     os.system(extract_command)
 
     # Rename output
     rename_command = "mv {} {}".format("program.xml", output_xml_file)
     print("Command for renaming:")
-    print(rename_command)
+    print("  " + rename_command)
     os.system(rename_command)
 
     # update output
