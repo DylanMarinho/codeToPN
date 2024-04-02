@@ -41,7 +41,7 @@ It ends with the print of the function to compute the execution times of the mod
 ## Executing Roméo on the generated model
 When Roméo is open, open `[name of the C file].xml`, and check the property that was printed in the terminal output (resembling `EF[p,p](INST...[0]>0)`)
 
-NB: currently, the generated model will be in `generated_files/` and you will have to copy the chosen hardware models (one of the `hardware_models` subdirectories' content) into `examples/` *before* executing Roméo.
+NB: currently, the generated model will be in `generated_files/` and you will have to copy the chosen hardware models (one of the `hardware_models` subdirectories' content) into `generated_files/` *before* executing Roméo.
 
-## Author
-Developed by Dylan Marinho et al.
+## Authors
+Developed by Dylan Marinho, with contributions by Étienne André, Jean-Luc Béchennec and Didier Lime.
