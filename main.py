@@ -1,7 +1,6 @@
 #------------------------------------------------------------
 # Modules
 #------------------------------------------------------------
-
 import argparse
 import os
 
@@ -9,8 +8,9 @@ import os
 # Constants
 #------------------------------------------------------------
 output_dir = "generated_files/"
-#cortex     = "cortex-m0"
-cortex     = "cortex-m4"
+
+gcc_options = "-mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib"
+#gcc_options = "-mcpu=cortex-m4 -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib"
 
 #------------------------------------------------------------
 # This line can be customized using other files
@@ -100,6 +100,7 @@ def get_last_instruction(compiled_file, file_name):
     content = f.readlines()
     last_address = 0
     keyword_to_exclude = [".word", "nop"]
+    # TODO: check that `content` is not empty! (otherwise returns `0` instead of an exception)
     for line in content:
         last_instruction = True
         for keyword in keyword_to_exclude:
@@ -133,7 +134,7 @@ def run(file_name, file_path=""):
 
     # compile
     os.system(
-        ("arm-none-eabi-gcc -O0 {} -o {} -mcpu=" + cortex + " -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib").format(
+        ("arm-none-eabi-gcc -O0 {} -o {} " + gcc_options).format(
             input_file, compiled_file
         ))
 
@@ -150,10 +151,16 @@ def run(file_name, file_path=""):
                                                                               declarations_input_file_name))
 
     # Extract instructions
-    os.system("cat {} | src/extract {} > {}".format(bin_file, last_instruction, instructions_file))
+    extract_command = "cat {} | src/extract {} > {}".format(bin_file, last_instruction, instructions_file)
+    print("Command for extraction:")
+    print(extract_command)
+    os.system(extract_command)
 
     # Rename output
-    os.system("mv {} {}".format("program.xml", output_xml_file))
+    rename_command = "mv {} {}".format("program.xml", output_xml_file)
+    print("Command for renaming:")
+    print(rename_command)
+    os.system(rename_command)
 
     # update output
     slave_models_to_input = [core_model_name]
