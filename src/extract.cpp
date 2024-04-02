@@ -577,6 +577,7 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
         return new CMPR_t(inAddr, inCode);
       default:
         printf("Unsupported data processing inst: %d\n", secondOpCode);
+        printf("Instruction %x @ |0x%.8x|", inCode, inAddr);
       }
     }
     break;
