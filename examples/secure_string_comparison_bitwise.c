@@ -16,7 +16,7 @@ int main() {
     int result = 1; // true
 
     for (i = 0; i < length; i++){
-         result = result && (ca[i] == cb[i]);
+         result &= (ca[i] == cb[i]);
     }
 
 //     printf("Result: %d\n", result);
