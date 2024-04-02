@@ -6,6 +6,14 @@
 // #include <stdio.h>
 #include <stddef.h>
 
+// Needed to compile with m0plus
+void* memset(char* b, int c, size_t len){
+    while(len > 0){
+        *b++ = c;
+        len--;
+    }
+}
+
 int main() {
     int i;
     int length = 10; // length of the char
