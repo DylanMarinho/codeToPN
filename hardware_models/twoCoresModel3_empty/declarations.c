@@ -97,7 +97,7 @@ initially {
       mem[0].a[i] = i;
   }
   
-  initConsts(mem);
+  initConsts(mem[0]);
 
 }
 
