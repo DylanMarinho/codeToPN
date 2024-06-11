@@ -81,8 +81,7 @@ initially {
   // initCache(st[1].ICache);
 
   // initialise registers arbitrarily
-  int i;
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     st[0].regs.r[i] = i;
     //    st[1].regs.r[i] = 20 + i;
   }
