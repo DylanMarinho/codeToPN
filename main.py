@@ -1,22 +1,36 @@
+#------------------------------------------------------------
+# Modules
+#------------------------------------------------------------
 import argparse
 import os
+import sys
 
+#------------------------------------------------------------
+# Constants
+#------------------------------------------------------------
 output_dir = "generated_files/"
 
+gcc_options = "-mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib"
+#gcc_options = "-mcpu=cortex-m4 -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib"
+
+#------------------------------------------------------------
 # This line can be customized using other files
+#------------------------------------------------------------
 hardware_model_root = "hardware_models/twoCoresModel3_empty/"
 # TODO (ÉA, 2024/01/19): add an option somewhere! (earlier default: twoCoresModel3_empty.xml)
 
-# Constant
+#------------------------------------------------------------
+# Customized constants depending on hardware_model_root
+#------------------------------------------------------------
 declarations_input_file_name    = hardware_model_root + "declarations.c"
 core_model_name                 = hardware_model_root + "hardware.xml"
 
 
-def extract_adress(line):
+def extract_address(line):
     """
-    From a line of a rodata file, extract the adress
+    From a line of a rodata file, extract the address
     :param line: Line of rodata
-    :return: Adress
+    :return: Address
     """
     address = line.split("\t")[0]
     address = address.replace(" ", "")
@@ -75,12 +89,16 @@ def get_last_instruction(compiled_file, file_name):
     :param compiled_file: Path to a, ARM compiled file
     :return: Last instruction
     """
-    # We return the last adress which is not a nop or a word
+    # We return the last address which is not a nop or a word
 
     objdump_output = os.path.join(output_dir, file_name + ".objdump")
 
     # objdump
     os.system("arm-none-eabi-objdump -d {} > {}".format(compiled_file, objdump_output))
+
+    # check file existence
+    if (not(os.path.isfile(objdump_output))):
+        sys.exit("File " + objdump_output + " does not exist!")
 
     # read extracted file
     f = open(objdump_output, "r")
@@ -93,7 +111,7 @@ def get_last_instruction(compiled_file, file_name):
             if keyword in line:
                 last_instruction = False
         if last_instruction:
-            last_address = extract_adress(line)
+            last_address = extract_address(line)
     print("The last instruction found is '{}'".format(last_address))
     return last_address
 
@@ -120,7 +138,7 @@ def run(file_name, file_path=""):
 
     # compile
     os.system(
-        "arm-none-eabi-gcc -O0 {} -o {} -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16 -nostartfiles -fno-builtin --specs=nosys.specs -nostdlib".format(
+        ("arm-none-eabi-gcc -O0 {} -o {} " + gcc_options).format(
             input_file, compiled_file
         ))
 
@@ -137,10 +155,16 @@ def run(file_name, file_path=""):
                                                                               declarations_input_file_name))
 
     # Extract instructions
-    os.system("cat {} | src/extract {} > {}".format(bin_file, last_instruction, instructions_file))
+    extract_command = "cat {} | src/extract {} > {}".format(bin_file, last_instruction, instructions_file)
+    print("Command for extracting instructions:")
+    print("  " + extract_command)
+    os.system(extract_command)
 
     # Rename output
-    os.system("mv {} {}".format("program.xml", output_xml_file))
+    rename_command = "mv {} {}".format("program.xml", output_xml_file)
+    print("Command for renaming:")
+    print("  " + rename_command)
+    os.system(rename_command)
 
     # update output
     slave_models_to_input = [core_model_name]

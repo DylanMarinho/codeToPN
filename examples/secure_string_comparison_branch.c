@@ -1,9 +1,10 @@
 // Source       : https://en.wikipedia.org/wiki/Timing_attack (secure version, as of 2024/01/19)
 // Created by   : Étienne André and Didier Lime
-// Created      : 2024/01/19
+// Created      : 2024/04/02
 // Last modified: 2024/04/02
 
 // #include <stdio.h>
+#include <stddef.h>
 
 int main() {
     int i;
@@ -16,7 +17,11 @@ int main() {
     int result = 1; // true
 
     for (i = 0; i < length; i++){
-         result = result && (ca[i] == cb[i]);
+        if (result){
+         result = (ca[i] == cb[i]);
+        }else {
+         result = 0;
+        }
     }
 
 //     printf("Result: %d\n", result);

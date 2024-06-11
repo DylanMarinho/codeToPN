@@ -415,6 +415,28 @@ public:
   };
 };
 
+class ADC_t : public Inst_t {
+  uint8_t dReg, sReg;
+
+public:
+  ADC_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
+    dReg = inCode & 0b111;
+    sReg = (inCode >> 3) & 0b111;
+  }
+  virtual void Print() { printf("%x: adcs r%d, r%d", addr, dReg, sReg); }
+
+  virtual void romeoFuncContent() {
+    printf("  uint64_t op1 = ");
+    pReg(dReg);
+    printf(";\n  uint64_t op2 = ");
+    pReg(dReg);
+    printf(";\n  uint64_t val = op1 + op2;\n");
+    wReg(dReg);
+    printf("val;\n");
+    updateSR("val", "op1", "op2");
+  };
+};
+
 class RSB_t : public Inst_t {
   uint8_t dReg, sReg;
 
@@ -570,6 +592,9 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
       case 0:
         return new AND_t(inAddr, inCode);
         break;
+      case 5:
+        return new ADC_t(inAddr, inCode);
+        break;
       case 9:
         return new RSB_t(inAddr, inCode);
         break;
@@ -577,6 +602,7 @@ Inst_t *Inst_t::decodeThumb2(const uint32_t inAddr, const uint16_t inCode) {
         return new CMPR_t(inAddr, inCode);
       default:
         printf("Unsupported data processing inst: %d\n", secondOpCode);
+        printf("Instruction %x @ |0x%.8x|", inCode, inAddr);
       }
     }
     break;
