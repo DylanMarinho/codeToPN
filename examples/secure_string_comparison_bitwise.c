@@ -4,6 +4,10 @@
 // Last modified: 2024/04/02
 
 // #include <stdio.h>
+#include <stddef.h>
+
+// Needed to compile with m0plus
+void *memset(char *b, int c, size_t len);
 
 int main() {
     int i;
@@ -22,4 +26,11 @@ int main() {
 //     printf("Result: %d\n", result);
 
     return result;
+}
+
+void *memset(char *b, int c, size_t len) {
+  while (len > 0) {
+    *b++ = c;
+    len--;
+  }
 }
