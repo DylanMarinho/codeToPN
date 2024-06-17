@@ -119,7 +119,7 @@ def get_last_instruction(compiled_file, file_name):
                 if keyword in line:
                     last_instruction = False
 
-        if last_instruction and in_main and len(line)>2:
+        if last_instruction and in_main and len(line)>1:
             last_address = extract_address(line)
             
     print("The last instruction found is '{}'".format(last_address))
