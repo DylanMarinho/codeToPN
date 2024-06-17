@@ -4,6 +4,7 @@
 import argparse
 import os
 import sys
+import re
 
 #------------------------------------------------------------
 # Constants
@@ -101,17 +102,26 @@ def get_last_instruction(compiled_file, file_name):
         sys.exit("File " + objdump_output + " does not exist!")
 
     # read extracted file
+    in_main = False
     f = open(objdump_output, "r")
     content = f.readlines()
     last_address = 0
     keyword_to_exclude = [".word", "nop"]
+    r = re.compile(r"<(.+)>:")
     for line in content:
         last_instruction = True
-        for keyword in keyword_to_exclude:
-            if keyword in line:
-                last_instruction = False
-        if last_instruction:
+        m = r.search(line)
+        if m:
+            last_instruction = False
+            in_main = (m.groups()[0] == "main")
+        else:
+            for keyword in keyword_to_exclude:
+                if keyword in line:
+                    last_instruction = False
+
+        if last_instruction and in_main and len(line)>2:
             last_address = extract_address(line)
+            
     print("The last instruction found is '{}'".format(last_address))
     return last_address
 
