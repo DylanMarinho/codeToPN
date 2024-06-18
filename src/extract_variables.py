@@ -23,7 +23,7 @@ def transform_number(entry):
 def parse_line(line):
     """
     Parse a line containing variables of a rodata file
-    :param line: Line containing varibles: [addr] [data]
+    :param line: Line containing variables: [addr] [data]
     :return: List [memory adress, data1, data2, ...]
     """
     line = re.sub(r'\s+', ' ', line)  # remove multiple spaces
@@ -46,7 +46,7 @@ def parsed_line_to_entries(parsed_line):
     addr = parsed_line[0]
     values = parsed_line[1::]
     for i in range(len(values)):
-        ret_table.append([addr + i * 4, int(values[i], 0)])  # 4 = sizeof(int)
+        ret_table.append([hex(addr + i * 4), values[i]])  # 4 = sizeof(int)
     return ret_table
 
 
