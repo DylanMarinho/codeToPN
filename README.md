@@ -44,4 +44,4 @@ When Roméo is open, open `[name of the C file].xml`, and check the property tha
 NB: currently, the generated model will be in `generated_files/` and you will have to copy the chosen hardware models (one of the `hardware_models` subdirectories' content) into `generated_files/` *before* executing Roméo.
 
 ## Authors
-Developed by Dylan Marinho, with contributions by Étienne André, Jean-Luc Béchennec and Didier Lime.
+Developed by Jean-Luc Béchennec, with contributions by Étienne André, and Didier Lime and Dylan Marinho.
