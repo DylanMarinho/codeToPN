@@ -200,37 +200,39 @@ public:
 };
 
 class SUBR_t : public Inst_t {
-  uint8_t sReg, dReg, imm5;
+  uint8_t nReg, dReg, mReg;
 
 public:
   SUBR_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
-    sReg = (inCode >> 3) & 0b111;
+    nReg = (inCode >> 3) & 0b111;
     dReg = inCode & 0b111;
-    imm5 = (inCode >> 6) & 0b11111;
+    mReg = (inCode >> 6) & 0b111;
   }
   virtual void Print() {
-    printf("%x: sub r%d, r%d, #%d", addr, dReg, sReg, imm5);
+    printf("%x: sub r%d, r%d, r%d", addr, dReg, nReg, mReg);
   }
 };
 
 class ADDR_t : public Inst_t {
-  uint8_t sReg, dReg, imm3;
+  uint8_t nReg, dReg, mReg;
 
 public:
   ADDR_t(const uint32_t inAddr, const uint16_t inCode) : Inst_t(inAddr) {
-    sReg = (inCode >> 3) & 0b111;
+    nReg = (inCode >> 3) & 0b111;
     dReg = inCode & 0b111;
-    imm3 = (inCode >> 6) & 0b111;
+    mReg = (inCode >> 6) & 0b111;
   }
 
   virtual void Print() {
-    printf("%x: add r%d, r%d, #%d", addr, dReg, sReg, imm3);
+    printf("%x: add r%d, r%d, r%d", addr, dReg, nReg, mReg);
   }
 
   virtual void romeoFuncContent() {
     wReg(dReg);
-    pReg(sReg);
-    printf(" + %d;\n", imm3);
+    pReg(nReg);
+    printf(" + ");
+    pReg(mReg);
+    printf(";\n");
   };
 };
 
